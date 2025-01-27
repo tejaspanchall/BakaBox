@@ -7,13 +7,11 @@ import Recommandation from './components//recommandation/Recommandation';
 import Tracking from './components/tracking/Tracking';
 import Wallpapers from './components/wallpapers/Wallpapers';
 import Websites from './components/websites/Websites';
-import Navbar from './components/navbar/Navbar';
 import './App.css';
 
 function App() {
   return (
     <Router>
-      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/calender" element={<Calender />} />

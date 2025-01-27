@@ -2,11 +2,18 @@ import React from 'react';
 
 const Chat = () => {
   return (
-    <div>
-      <h1>Organizational Resilience</h1>
-      <p>Details about resilience...</p>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '2rem',
+      }}
+    >
+      Coming Soon...
     </div>
-  );
+  );  
 };
 
 export default Chat;
