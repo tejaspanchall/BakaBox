@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import styles from './Suggestion.module.css';
 import { RefreshCw } from 'lucide-react';
+import styles from './Suggestion.module.css';
 
 const AnimeCard = () => {
   const [anime, setAnime] = useState({
@@ -13,12 +13,21 @@ const AnimeCard = () => {
     id: 0
   });
   const [loading, setLoading] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const truncateDescription = (text, wordCount = 70) => {
+    if (!text) return '';
+    const words = text.split(' ');
+    if (words.length <= wordCount) return text;
+    return words.slice(0, wordCount).join(' ') + '...';
+  };
 
   const fetchRandomAnime = async () => {
     setLoading(true);
+    setShowFullDescription(false);
     try {
       const page = Math.floor(Math.random() * 50) + 1;
-
+      
       const query = `
         query ($page: Int) {
           Page(page: $page, perPage: 50) {
@@ -30,11 +39,15 @@ const AnimeCard = () => {
               }
               description
               coverImage {
+                extraLarge
                 large
               }
               genres
               meanScore
               episodes
+              season
+              seasonYear
+              status
             }
           }
         }
@@ -44,6 +57,7 @@ const AnimeCard = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           query,
@@ -58,11 +72,14 @@ const AnimeCard = () => {
       setAnime({
         title: randomAnime.title.english || randomAnime.title.romaji,
         description: randomAnime.description?.replace(/<[^>]*>/g, '') || 'No description available',
-        coverImage: randomAnime.coverImage.large,
+        coverImage: randomAnime.coverImage.extraLarge || randomAnime.coverImage.large,
         genres: randomAnime.genres,
         meanScore: randomAnime.meanScore,
         episodes: randomAnime.episodes,
-        id: randomAnime.id
+        id: randomAnime.id,
+        season: randomAnime.season,
+        seasonYear: randomAnime.seasonYear,
+        status: randomAnime.status
       });
     } catch (error) {
       console.error('Error fetching anime:', error);
@@ -76,48 +93,69 @@ const AnimeCard = () => {
   }, []);
 
   return (
-    <div className={styles.containerFullPage}>
-      <h1 className={styles.title}>{anime.title}</h1>
-      <p className={styles.info}>Episodes: {anime.episodes} | Score: {anime.meanScore}%</p>
-      {anime.coverImage && (
-        <img 
-          src={anime.coverImage} 
-          alt={anime.title} 
-          className={styles.coverImage}
-        />
-      )}
-      <p className={styles.description}>{anime.description}</p>
-      <div className={styles.genreContainer}>
-        {anime.genres.map((genre, index) => (
-          <span key={index} className={styles.genre}>{genre}</span>
-        ))}
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.mainInfo}>
+          <div className={styles.coverImageContainer}>
+            {anime.coverImage && (
+              <img
+                src={anime.coverImage}
+                alt={anime.title}
+                className={styles.coverImage}
+              />
+            )}
+          </div>
+          
+          <div className={styles.infoContainer}>
+            <h1 className={styles.title}>{anime.title}</h1>
+            
+            <div className={styles.metadata}>
+              <span>{anime.episodes} Episodes</span>
+              <span className={styles.dot}>•</span>
+              <span>{anime.meanScore}% Rating</span>
+              {anime.season && (
+                <>
+                  <span className={styles.dot}>•</span>
+                  <span>{anime.season} {anime.seasonYear}</span>
+                </>
+              )}
+            </div>
+
+            <div className={styles.genres}>
+              {anime.genres.map((genre, index) => (
+                <span key={index} className={styles.genre}>
+                  {genre}
+                </span>
+              ))}
+            </div>
+
+            <div className={styles.descriptionContainer}>
+              <p className={styles.description}>
+                {showFullDescription ? anime.description : truncateDescription(anime.description)}
+              </p>
+              {anime.description.split(' ').length > 70 && (
+                <button 
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className={styles.readMoreButton}
+                >
+                  {showFullDescription ? 'Show Less' : 'Read More'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className={styles.linksContainer}>
-        <a 
-          href={`https://www.anime-planet.com/anime/${encodeURIComponent(anime.title.replace(/ /g, '-'))}`} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={styles.link}
+
+      <div className={styles.fixedButtonContainer}>
+        <button
+          onClick={fetchRandomAnime}
+          disabled={loading}
+          className={styles.button}
         >
-          View on Anime-Planet
-        </a>
-        <a 
-          href={`https://myanimelist.net/anime/${anime.id}`} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={styles.link}
-        >
-          View on MyAnimeList
-        </a>
+          <RefreshCw className={`${styles.icon} ${loading ? styles.spinning : ''}`} />
+          Get Random Anime
+        </button>
       </div>
-      <button 
-        onClick={fetchRandomAnime} 
-        disabled={loading} 
-        className={styles.button}
-      >
-        <RefreshCw className={`${styles.icon} ${loading ? styles.loading : ''}`} />
-        Get Random Anime
-      </button>
     </div>
   );
 };

@@ -1,112 +1,195 @@
-.containerFullPage {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.container {
   min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 40px 20px 100px 20px;
+  position: relative;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mainInfo {
+  display: flex;
+  gap: 40px;
   background-color: white;
-  color: black;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 500px;
 }
 
-.title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.info {
-  font-size: 1rem;
-  color: gray;
-  margin-bottom: 20px;
+.coverImageContainer {
+  flex-shrink: 0;
 }
 
 .coverImage {
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 225px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.description {
-  font-size: 1rem;
-  margin-bottom: 20px;
-  line-height: 1.5;
+.infoContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
   color: #333;
+  line-height: 1.2;
 }
 
-.genreContainer {
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.dot {
+  color: #999;
+}
+
+.genres {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
 .genre {
-  padding: 5px 10px;
-  background-color: #f0f0f0;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 6px 16px;
   border-radius: 20px;
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 14px;
 }
 
-.linksContainer {
-  margin-bottom: 20px;
+.descriptionContainer {
+  margin-bottom: 32px;
 }
 
-.link {
-  display: inline-block;
-  margin: 0 10px;
-  font-size: 1rem;
-  color: #007BFF;
-  text-decoration: none;
-  transition: color 0.2s ease;
+.description {
+  color: #444;
+  line-height: 1.8;
+  font-size: 16px;
+  margin-bottom: 12px;
 }
 
-.link:hover {
-  color: #0056b3;
+.readMoreButton {
+  background: none;
+  border: none;
+  color: #9b59b6;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.readMoreButton:hover {
+  color: #8e44ad;
+}
+
+.fixedButtonContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background-color: #007BFF;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #9b59b6;
   color: white;
-  font-size: 1rem;
-  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-}
-
-.button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  font-size: 16px;
 }
 
 .button:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: #8e44ad;
+}
+
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .icon {
-  margin-right: 10px;
+  width: 20px;
+  height: 20px;
 }
 
-.loading {
+.spinning {
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 20px 100px 20px;
+  }
+
+  .mainInfo {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 24px;
+  }
+
+  .coverImageContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .coverImage {
+    width: 200px;
+    height: 285px;
+  }
+
+  .infoContainer {
+    text-align: center;
+  }
+
+  .metadata {
+    justify-content: center;
+  }
+
+  .genres {
+    justify-content: center;
+  }
+
+  .description {
+    text-align: left;
   }
 }
