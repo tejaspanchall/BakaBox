@@ -1,0 +1,112 @@
+.containerFullPage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: white;
+  color: black;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.info {
+  font-size: 1rem;
+  color: gray;
+  margin-bottom: 20px;
+}
+
+.coverImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.description {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.genreContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.genre {
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.linksContainer {
+  margin-bottom: 20px;
+}
+
+.link {
+  display: inline-block;
+  margin: 0 10px;
+  font-size: 1rem;
+  color: #007BFF;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #0056b3;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #007BFF;
+  color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

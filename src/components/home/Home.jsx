@@ -16,7 +16,7 @@ const Home = () => {
     },
     {
       image: "/assets/home/Image2.jpg",
-      route: "/Recommandation",
+      route: "/Suggestion",
     },
     {
       image: "/assets/home/Image1.jpg",
