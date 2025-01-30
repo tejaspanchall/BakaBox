@@ -16,12 +16,13 @@ const Home = () => {
   ];
 
   return (
-    <div className={styles.container}>
-      <Header /> {/* Use the Header component here */}
+    <div>
+      <Header />
+      <div className={styles.container}>
       <div className={styles.grid}>
         {cards.map((card, index) => (
           <div
-            key={index} // Use index as the key
+            key={index}
             onClick={() => navigate(card.route)}
             className={`${styles.card} ${styles.small}`}
           >
@@ -37,6 +38,7 @@ const Home = () => {
         </div>
         <a href="/privacy-policy" className={styles.privacy}>Privacy Policy</a>
       </footer>
+    </div>
     </div>
   );
 };

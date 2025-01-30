@@ -94,8 +94,9 @@ const AnimeCard = () => {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div>
       <Header />
+    <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.mainInfo}>
           <div className={styles.coverImageContainer}>
@@ -158,6 +159,7 @@ const AnimeCard = () => {
           Get Random Anime
         </button>
       </div>
+    </div>
     </div>
   );
 };
