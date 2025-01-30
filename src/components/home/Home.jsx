@@ -6,42 +6,20 @@ const Home = () => {
   const navigate = useNavigate();
 
   const cards = [
-    {
-      image: "/assets/home/Image2.jpg",
-      route: "/Calender",
-    },
-    {
-      image: "/assets/home/Image1.jpg",
-      route: "/Chat",
-    },
-    {
-      image: "/assets/home/Image2.jpg",
-      route: "/Suggestion",
-    },
-    {
-      image: "/assets/home/Image1.jpg",
-      route: "/Tracking",
-    },
-    {
-      image: "/assets/home/Image2.jpg",
-      route: "/wallpapers",
-    },
-    {
-      image: "/assets/home/Image1.jpg",
-      route: "/websites",
-    }
+    { image: "/assets/home/Image2.jpg", route: "/Suggestion" },
+    { image: "/assets/home/Image2.jpg", route: "/Calender" },
+    { image: "/assets/home/Image1.jpg", route: "/Chat" },
+    { image: "/assets/home/Image1.jpg", route: "/Tracking" },
+    { image: "/assets/home/Image2.jpg", route: "/wallpapers" },
+    { image: "/assets/home/Image1.jpg", route: "/websites" }
   ];
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
       <div className={styles.header}>
-      {/* <img src="/assets/logo.png" alt="BakaBox Logo" className={styles.logo} /> */}
-        <h1 className={styles.title}>BakaBox</h1>
-        <p className={styles.tagline}>Your home for everything about anime</p>
+        <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
       </div>
 
-      {/* Grid of Cards */}
       <div className={styles.grid}>
         {cards.map((card, index) => (
           <div
@@ -53,6 +31,14 @@ const Home = () => {
           </div>
         ))}
       </div>
+
+      <footer className={styles.footer}>
+        <p className={styles.footerText}>Made by Baka, Made for Baka.</p>
+        <div className={styles.buttons}>
+          <a href="https://buymeacoffee.com/bakabox" target="_blank" className={styles.button}>Buy Me a Coffee</a>
+        </div>
+        <a href="/privacy-policy" className={styles.privacy}>Privacy Policy</a>
+      </footer>
     </div>
   );
 };
