@@ -30,12 +30,15 @@ const Home = () => {
   }, []);
 
   const cards = [
-    { image: "/assets/home/Image2.jpg", route: "/Suggestion" },
+    { image: "/assets/home/Image1.jpg", route: "/RandomAnime" },
     { image: "/assets/home/Image2.jpg", route: "/Calender" },
     { image: "/assets/home/Image1.jpg", route: "/Quotes" },
-    { image: "/assets/home/Image1.jpg", route: "/Tracking" },
-    { image: "/assets/home/Image2.jpg", route: "/wallpapers" },
-    { image: "/assets/home/Image1.jpg", route: "/websites" }
+    { image: "/assets/home/Image2.jpg", route: "/Tracking" },
+    { image: "/assets/home/Image1.jpg", route: "/wallpapers" },
+    { image: "/assets/home/Image2.jpg", route: "/websites" },
+    { image: "/assets/home/Image1.jpg", route: "/websites" },
+    { image: "/assets/home/Image2.jpg", route: "/websites" }
+    
   ];
 
   return (

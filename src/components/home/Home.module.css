@@ -69,6 +69,7 @@
   height: 100%;
   object-fit: cover;
   border-radius: 1rem;
+  /* border: 2.5px solid black; */
 }
 
 .footer {
@@ -79,7 +80,7 @@
 
 .footerText {
   font-size: 1.2rem;
-  color: #333; /* Dark gray */
+  color: #333;
   margin-bottom: 1rem;
 }
 

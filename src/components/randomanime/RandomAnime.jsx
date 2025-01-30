@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
-import styles from './Suggestion.module.css';
+import styles from './RandomAnime.module.css';
 import Header from '../header/Header';
 
-const AnimeCard = () => {
+const RandomAnime = () => {
   const [anime, setAnime] = useState({
     title: 'Loading...',
     description: '',
@@ -164,4 +164,4 @@ const AnimeCard = () => {
   );
 };
 
-export default AnimeCard;
+export default RandomAnime;

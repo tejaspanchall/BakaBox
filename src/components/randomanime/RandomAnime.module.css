@@ -82,7 +82,7 @@
 }
 
 .genre {
-  background-color: #8e44ad;
+  background-color: #447ead;
   color: white;
   padding: 6px 16px;
   border-radius: 20px;
@@ -103,7 +103,7 @@
 .readMoreButton {
   background: none;
   border: none;
-  color: #8e44ad;
+  color: #447ead;
   cursor: pointer;
   font-size: 14px;
   padding: 0;
@@ -111,7 +111,7 @@
 }
 
 .readMoreButton:hover {
-  color: #bc7bd5;
+  color: #5f99c8;
 }
 
 .fixedButtonContainer {
@@ -132,7 +132,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background-color: #bc7bd5;
+  background-color: #447ead;
   color: white;
   border: none;
   border-radius: 8px;
@@ -142,7 +142,7 @@
 }
 
 .button:hover:not(:disabled) {
-  background-color: #8e44ad;
+  background-color: #5f99c8;
 }
 
 .button:disabled {
