@@ -10,9 +10,11 @@ const Home = () => {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await fetch('https://animechan.io/api/v1/quotes/random');
+        const response = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent('https://animechan.io/api/v1/quotes/random')}`
+        );
         const data = await response.json();
-        setQuote(data);
+        setQuote(JSON.parse(data.contents));
       } catch (error) {
         console.error('Error fetching quote:', error);
       }
