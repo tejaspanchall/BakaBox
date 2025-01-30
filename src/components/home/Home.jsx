@@ -6,23 +6,20 @@ import Header from '../header/Header';
 const Home = () => {
   const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     const fetchQuote = async () => {
-      if (hasLoaded) return; // Skip if we've already loaded a quote
-      
       try {
-        const response = await fetch('https://yurippe.vercel.app/api/quotes');
+        const response = await fetch(`https://yurippe.vercel.app/api/quotes?timestamp=${new Date().getTime()}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const quotes = await response.json();
-        const shortQuotes = quotes.filter(q => q.quote.split(' ').length <= 30);
+        const shortQuotes = quotes.filter(q => q.quote.split(' ').length <= 35);
+
         if (shortQuotes.length > 0) {
           const randomIndex = Math.floor(Math.random() * shortQuotes.length);
           setQuote(shortQuotes[randomIndex]);
-          setHasLoaded(true); // Mark as loaded after setting the quote
         }
       } catch (error) {
         console.error('Error fetching quote:', error);
@@ -30,7 +27,7 @@ const Home = () => {
     };
 
     fetchQuote();
-  }, [hasLoaded]); // Only depend on hasLoaded
+  }, []);
 
   const cards = [
     { image: "/assets/home/Image2.jpg", route: "/Suggestion" },
@@ -66,7 +63,7 @@ const Home = () => {
         <footer className={styles.footer}>
           <p className={styles.footerText}>Made by Baka, Made for Baka.</p>
           <div className={styles.buttons}>
-            <a href="https://buymeacoffee.com/bakabox" target="_blank" rel="noopener noreferrer" className={styles.button}>Buy Me a Coffee</a>
+            <a href="https://buymeacoffee.com/bakabox" target="_blank" rel="noopener noreferrer" className={styles.button}>&#x2615; Buy Me a Coffee</a>
           </div>
           <a href="/privacy-policy" className={styles.privacy}>Privacy Policy</a>
         </footer>
