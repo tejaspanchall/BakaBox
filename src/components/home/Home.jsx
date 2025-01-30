@@ -5,6 +5,21 @@ import Header from '../header/Header';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [quote, setQuote] = useState(null);
+
+  useEffect(() => {
+    const fetchQuote = async () => {
+      try {
+        const response = await fetch('https://animechan.io/api/v1/quotes/random');
+        const data = await response.json();
+        setQuote(data);
+      } catch (error) {
+        console.error('Error fetching quote:', error);
+      }
+    };
+
+    fetchQuote();
+  }, []);
 
   const cards = [
     { image: "/assets/home/Image2.jpg", route: "/Suggestion" },
@@ -18,6 +33,12 @@ const Home = () => {
   return (
     <div>
       <Header />
+      {quote && (
+        <div className={styles.quoteSection}>
+          <p className={styles.quoteContent}>"{quote.quote}"</p>
+          <p className={styles.quoteCharacter}>- {quote.character} ({quote.anime})</p>
+        </div>
+      )}
       <div className={styles.container}>
         <div className={styles.grid}>
           {cards.map((card, index) => (
