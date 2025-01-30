@@ -6,22 +6,31 @@ import Header from '../header/Header';
 const Home = () => {
   const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     const fetchQuote = async () => {
+      if (hasLoaded) return; // Skip if we've already loaded a quote
+      
       try {
-        const response = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent('https://animechan.io/api/v1/quotes/random')}`
-        );
-        const data = await response.json();
-        setQuote(JSON.parse(data.contents));
+        const response = await fetch('https://yurippe.vercel.app/api/quotes');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const quotes = await response.json();
+        const shortQuotes = quotes.filter(q => q.quote.split(' ').length <= 30);
+        if (shortQuotes.length > 0) {
+          const randomIndex = Math.floor(Math.random() * shortQuotes.length);
+          setQuote(shortQuotes[randomIndex]);
+          setHasLoaded(true); // Mark as loaded after setting the quote
+        }
       } catch (error) {
         console.error('Error fetching quote:', error);
       }
     };
 
     fetchQuote();
-  }, []);
+  }, [hasLoaded]); // Only depend on hasLoaded
 
   const cards = [
     { image: "/assets/home/Image2.jpg", route: "/Suggestion" },
@@ -38,7 +47,7 @@ const Home = () => {
       {quote && (
         <div className={styles.quoteSection}>
           <p className={styles.quoteContent}>"{quote.quote}"</p>
-          <p className={styles.quoteCharacter}>- {quote.character} ({quote.anime})</p>
+          <p className={styles.quoteCharacter}>- {quote.character} ({quote.show})</p>
         </div>
       )}
       <div className={styles.container}>
@@ -57,7 +66,7 @@ const Home = () => {
         <footer className={styles.footer}>
           <p className={styles.footerText}>Made by Baka, Made for Baka.</p>
           <div className={styles.buttons}>
-            <a href="https://buymeacoffee.com/bakabox" target="_blank" className={styles.button}>Buy Me a Coffee</a>
+            <a href="https://buymeacoffee.com/bakabox" target="_blank" rel="noopener noreferrer" className={styles.button}>Buy Me a Coffee</a>
           </div>
           <a href="/privacy-policy" className={styles.privacy}>Privacy Policy</a>
         </footer>
