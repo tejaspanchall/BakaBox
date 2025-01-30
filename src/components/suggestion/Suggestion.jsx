@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import styles from './Suggestion.module.css';
+import Header from '../header/Header';
 
 const AnimeCard = () => {
   const [anime, setAnime] = useState({
@@ -94,6 +95,7 @@ const AnimeCard = () => {
 
   return (
     <div className={styles.container}>
+      <Header />
       <div className={styles.content}>
         <div className={styles.mainInfo}>
           <div className={styles.coverImageContainer}>

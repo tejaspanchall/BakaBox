@@ -1,6 +1,20 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Chivo', sans-serif;
+}
+
+@font-face {
+  font-family: 'Chivo';
+  src: url('/public/assets/fonts/chivo.regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: white;
   padding: 40px 20px 100px 20px;
   position: relative;
 }
@@ -13,11 +27,11 @@
 .mainInfo {
   display: flex;
   gap: 40px;
-  background-color: white;
+  background-color: #e0e0e0;
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .coverImageContainer {
@@ -89,7 +103,7 @@
 .readMoreButton {
   background: none;
   border: none;
-  color: #9b59b6;
+  color: #8e44ad;
   cursor: pointer;
   font-size: 14px;
   padding: 0;
@@ -97,7 +111,7 @@
 }
 
 .readMoreButton:hover {
-  color: #8e44ad;
+  color: #bc7bd5;
 }
 
 .fixedButtonContainer {
@@ -118,7 +132,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background-color: #9b59b6;
+  background-color: #bc7bd5;
   color: white;
   border: none;
   border-radius: 8px;

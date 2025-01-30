@@ -1,3 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Chivo', sans-serif;
+}
+
+@font-face {
+  font-family: 'Chivo';
+  src: url('/public/assets/fonts/chivo.regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .container {
   padding: 1rem;
   background-color: #ffffff;
@@ -5,18 +19,6 @@
   height: 100%;
   overflow-y: auto;
   color: #000000;
-}
-
-.header {
-  text-align: center;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.logo {
-  width: 200px;
-  height: auto;
-  margin-bottom: 1rem;
 }
 
 .grid {

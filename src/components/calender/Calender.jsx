@@ -1,8 +1,11 @@
 import React from 'react';
+import Header from '../header/Header';
 
 const Calender = () => {
   return (
-    <div
+    <div>
+      <Header />
+      <div
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -12,6 +15,7 @@ const Calender = () => {
       }}
     >
       Coming Soon...
+    </div>
     </div>
   );  
 };

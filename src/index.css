@@ -5,10 +5,9 @@
 }
 
 @font-face {
-  font-family: 'Tolyer No.1 Bold';
-  src: url('../public/assets/fonts/TolyerNo1-Bold.woff2') format('woff2'),
-       url('../public/assets/fonts/TolyerNo1-Bold.woff') format('woff');
-       
-  font-weight: bold;
+  font-family: 'Chivo';
+  src: url('../public/assets/fonts/chivo.regular.ttf') format('truetype');
+  
+  font-weight: normal;
   font-style: normal;
 }

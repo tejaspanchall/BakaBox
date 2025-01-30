@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Home.module.css';
+import Header from '../header/Header';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -16,10 +17,7 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
-      </div>
-
+      <Header /> {/* Use the Header component here */}
       <div className={styles.grid}>
         {cards.map((card, index) => (
           <div
