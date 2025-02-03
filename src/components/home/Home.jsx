@@ -31,9 +31,9 @@ const Home = () => {
 
   // 1000px x 377px
   const cards = [
-    { image: "/assets/home/Random.jpg", route: "/RandomAnime" },
-    { image: "/assets/home/Calender.jpg", route: "/Calender" },
-    { image: "/assets/home/Image1.jpg", route: "/Quotes" },
+    { image: "/assets/home/Random.jpg", route: "/random-anime" },
+    { image: "/assets/home/Calender.jpg", route: "/calender" },
+    { image: "/assets/home/Image1.jpg", route: "/life-on-anime" },
     { image: "/assets/home/Image2.jpg", route: "/Tracking" },
     { image: "/assets/home/Image1.jpg", route: "/wallpapers" },
     { image: "/assets/home/Image2.jpg", route: "/websites" },
