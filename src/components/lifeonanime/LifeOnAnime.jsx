@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import Header from '../header/Header';
 import styles from './LifeOnAnime.module.css';
 
+const TimeUnit = ({ value, label }) => {
+  return (
+    <div className={styles.timeUnit}>
+      <div className={styles.value}>{String(value).padStart(2, '0')}</div>
+      <span className={styles.label}>{label}</span>
+    </div>
+  );
+};
+
 const LifeOnAnime = () => {
   const [username, setUsername] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -75,13 +84,21 @@ const LifeOnAnime = () => {
         });
       });
 
-      const days = Math.floor(totalMinutes / (60 * 24));
-      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+      const years = Math.floor(totalMinutes / (525600));
+      const months = Math.floor((totalMinutes % 525600) / 43800);
+      const days = Math.floor((totalMinutes % 43800) / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
       const minutes = totalMinutes % 60;
 
-      setTimeData({ days, hours, minutes, totalMinutes });
-      setCountingStats({ days: 0, hours: 0, minutes: 0 });
+      setTimeData({ years, months, days, hours, minutes });
+      setCountingStats({ years: 0, months: 0, days: 0, hours: 0, minutes: 0 });
 
+      animateNumber(0, years, 2000, (value) => 
+        setCountingStats(prev => ({ ...prev, years: value }))
+      );
+      animateNumber(0, months, 2000, (value) => 
+        setCountingStats(prev => ({ ...prev, months: value }))
+      );
       animateNumber(0, days, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, days: value }))
       );
@@ -111,51 +128,61 @@ const LifeOnAnime = () => {
   return (
     <div>
       <Header />
-      <div className={styles.container}>
-        {!submitted ? (
-          <>
-            <div className={styles.header}>
-              <h1>⏳ Your Life on Anime</h1>
-            </div>
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <input
-                type="text"
-                placeholder="AniList Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className={styles.input}
-                disabled={isLoading}
-              />
-              <button type="submit" className={styles.button} disabled={isLoading || !username}>
-                {isLoading ? '🔄' : '✨'}
-              </button>
-            </form>
-            {error && <div className={styles.error}>{error}</div>}
-          </>
-        ) : (
-          <div className={styles.results}>
-            <h2 className={styles.usernameMessage}>
-              Hey <span className={styles.username}>{username}</span>, <br></br> you've successfully wasted this much time watching anime!
-            </h2>
-            <div className={styles.statsGrid}>
-              <div className={styles.stat}>
-                <span className={styles.statValue}>{countingStats.days}</span>
-                <span className={styles.statLabel}>days</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statValue}>{countingStats.hours}</span>
-                <span className={styles.statLabel}>hrs</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statValue}>{countingStats.minutes}</span>
-                <span className={styles.statLabel}>min</span>
-              </div>
-            </div>
-            {timeData && <p className={styles.totalTime}>🎬 {timeData.totalMinutes.toLocaleString()} minutes total</p>}
-            <button className={styles.resetButton} onClick={handleReset}>🔄 Reset</button>
+    <div className={styles.mainContainer}>
+      {!submitted ? (
+        <div className={styles.formSection}>
+          <div className={styles.header}>
+            <h1>⏳ Your Life on Anime</h1>
           </div>
-        )}
-      </div>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <input
+              type="text"
+              placeholder="AniList Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={styles.input}
+              disabled={isLoading}
+            />
+            <button 
+              type="submit" 
+              className={styles.button}
+              disabled={isLoading || !username}
+            >
+              {isLoading ? '🔄' : '✨'}
+            </button>
+          </form>
+          {error && <div className={styles.error}>{error}</div>}
+        </div>
+      ) : (
+        <div className={styles.results}>
+          <h2 className={styles.usernameMessage}>
+           👋 Hey <span className={styles.username}>{username}</span>, <br/>
+            you've successfully wasted this much time watching an anime!
+          </h2>
+          <div className={styles.clock}>
+            {countingStats && (
+              <>
+                <TimeUnit value={countingStats.years} label="YEARS" />
+                <div className={styles.separator}>:</div>
+                <TimeUnit value={countingStats.months} label="MONTHS" />
+                <div className={styles.separator}>:</div>
+                <TimeUnit value={countingStats.days} label="DAYS" />
+                <div className={styles.separator}>:</div>
+                <TimeUnit value={countingStats.hours} label="HOURS" />
+                <div className={styles.separator}>:</div>
+                <TimeUnit value={countingStats.minutes} label="MINS" />
+              </>
+            )}
+          </div>
+          <button
+            onClick={handleReset}
+            className={styles.resetButton}
+          >
+            🔄 Reset
+          </button>
+        </div>
+      )}
+    </div>
     </div>
   );
 };
