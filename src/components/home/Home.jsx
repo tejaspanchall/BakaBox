@@ -34,9 +34,9 @@ const Home = () => {
     { image: "/assets/home/Random.jpg", route: "/random-anime" },
     { image: "/assets/home/Calender.jpg", route: "/calender" },
     { image: "/assets/home/LifeOnAnime.jpg", route: "/life-on-anime" },
+    { image: "/assets/home/Image2.jpg", route: "/radio" },
     { image: "/assets/home/Image1.jpg", route: "/live-websites" },
     { image: "/assets/home/Image2.jpg", route: "/sub-vs-dub" },
-    { image: "/assets/home/Image2.jpg", route: "/radio" },
     { image: "/assets/home/Image1.jpg", route: "/websites" },
     { image: "/assets/home/Image2.jpg", route: "/websites" }
     
