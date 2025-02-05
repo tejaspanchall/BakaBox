@@ -12,44 +12,55 @@ const LiveWebsites = () => {
     },
     {
       id: 2,
+      name: 'HiAnime',
+      url: 'https://hianime.to/',
+      logo: 'assets/websites/hi.png'
+    },
+    {
+      id: 3,
       name: 'AniTaku (Gogo Anime)',
       url: 'https://anitaku.io/',
       logo: 'assets/websites/gogo.png'
     },
     {
-      id: 3,
-      name: 'HIDIVE',
-      url: 'https://www.hidive.com',
-      logo: '/api/placeholder/48/48'
-    },
-    {
       id: 4,
-      name: 'VRV',
-      url: 'https://vrv.co',
-      logo: '/api/placeholder/48/48'
+      name: 'animepahe',
+      url: 'https://animepahe.ru/',
+      logo: 'assets/websites/pahe.png'
     },
     {
       id: 5,
-      name: 'Netflix Anime',
-      url: 'https://www.netflix.com/browse/genre/7424',
-      logo: '/api/placeholder/48/48'
+      name: 'AllAnime (Hindi Dubbed)',
+      url: 'https://www.allanime.in/',
+      logo: 'assets/websites/all.png'
+    },
+    {
+      id: 6,
+      name: 'Yugen Anime',
+      url: 'https://yugenanime.in/',
+      logo: 'assets/websites/yugen.jpg' 
+    },
+    {
+      id: 7,
+      name: 'KissAnime',
+      url: 'https://kissanime.cfd/',
+      logo: 'assets/websites/kiss.jpg'
     }
   ];
 
   return (
-    <div>
-    <Header />
-    <div className={styles.container}>
-      <div className={styles.grid}>
-        {websiteList.map((website) => (
-          <a
-            key={website.id}
-            href={website.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.card}
-          >
-            <div className={styles.cardContent}>
+    <div className={styles.pageContainer}>
+      <Header />
+      <div className={styles.container}>
+        <div className={styles.list}>
+          {websiteList.map((website) => (
+            <a
+              key={website.id}
+              href={website.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.listItem}
+            >
               <img
                 src={website.logo}
                 alt={`${website.name} logo`}
@@ -57,13 +68,12 @@ const LiveWebsites = () => {
               />
               <div className={styles.websiteInfo}>
                 <h2 className={styles.websiteName}>{website.name}</h2>
-                <span className={styles.visitText}>Visit Site →</span>
+                <p className={styles.websiteUrl}>{website.url}</p>
               </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 };

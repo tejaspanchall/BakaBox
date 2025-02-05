@@ -133,11 +133,13 @@ const LifeOnAnime = () => {
         <div className={styles.formSection}>
           <div className={styles.header}>
             <h1>⏳ Your Life on Anime</h1>
+            <br />
+            <h4>Enter your AniList username</h4>
           </div>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input
               type="text"
-              placeholder="AniList Username"
+              placeholder="eg. joyboy"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={styles.input}

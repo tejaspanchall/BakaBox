@@ -19,6 +19,10 @@
   color: #1f2937;
 }
 
+.header h4 {
+  color: #364252;
+}
+
 .form {
   display: flex;
   gap: 0.5rem;
