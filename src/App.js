@@ -5,7 +5,7 @@ import Calender from './components/calender/Calender';
 import LifeOnAnime from './components/lifeonanime/LifeOnAnime';
 import RandomAnime from './components/randomanime/RandomAnime';
 import SubDub from './components/subdub/SubDub';
-import Wallpapers from './components/wallpapers/Wallpapers';
+import Radio from './components/radio/Radio';
 import LiveWebsites from './components/livewebsites/LiveWebsites';
 import './App.css';
 
@@ -18,7 +18,7 @@ function App() {
         <Route path="/calender" element={<Calender />} />
         <Route path="/life-on-anime" element={<LifeOnAnime />} />
         <Route path="/sub-vs-dub" element={<SubDub />} />
-        <Route path="/wallpapers" element={<Wallpapers />} />
+        <Route path="/radio" element={<Radio />} />
         <Route path="/live-websites" element={<LiveWebsites />} />
       </Routes>
     </Router>
