@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Tracking = () => {
+const SubDub = () => {
   return (
     <div
       style={{
@@ -16,4 +16,4 @@ const Tracking = () => {
   );  
 };
 
-export default Tracking;
+export default SubDub;
