@@ -30,18 +30,12 @@ const LiveWebsites = () => {
     },
     {
       id: 5,
-      name: 'AllAnime (Hindi Dubbed)',
-      url: 'https://www.allanime.in/',
-      logo: 'assets/websites/all.png'
-    },
-    {
-      id: 6,
       name: 'Yugen Anime',
       url: 'https://yugenanime.in/',
       logo: 'assets/websites/yugen.jpg' 
     },
     {
-      id: 7,
+      id: 6,
       name: 'KissAnime',
       url: 'https://kissanime.cfd/',
       logo: 'assets/websites/kiss.jpg'
