@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from './LiveWebsites.module.css';
+import styles from './WhereToWatch.module.css';
 import Header from '../header/Header';
 
-const LiveWebsites = () => {
+const WhereToWatch = () => {
   const websiteList = [
     {
       id: 1,
@@ -72,4 +72,4 @@ const LiveWebsites = () => {
   );
 };
 
-export default LiveWebsites;
+export default WhereToWatch;

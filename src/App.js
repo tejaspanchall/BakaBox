@@ -6,7 +6,7 @@ import LifeOnAnime from './components/lifeonanime/LifeOnAnime';
 import RandomAnime from './components/randomanime/RandomAnime';
 import SubDub from './components/subdub/SubDub';
 import Radio from './components/radio/Radio';
-import LiveWebsites from './components/livewebsites/LiveWebsites';
+import WhereToWatch from './components/wheretowatch/WhereToWatch';
 import './App.css';
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
         <Route path="/life-on-anime" element={<LifeOnAnime />} />
         <Route path="/sub-vs-dub" element={<SubDub />} />
         <Route path="/radio" element={<Radio />} />
-        <Route path="/live-websites" element={<LiveWebsites />} />
+        <Route path="/where-to-watch" element={<WhereToWatch />} />
       </Routes>
     </Router>
   );
