@@ -13,7 +13,7 @@ const Calendar = () => {
   const fetchAnimeData = async (retry = 0) => {
     const query = `
       query ($season: MediaSeason, $year: Int) {
-        Page(page: 1, perPage: 100) {
+        Page(page: 1, perPage: 50) {
           media(season: $season, seasonYear: $year, type: ANIME, sort: [POPULARITY_DESC]) {
             id
             title {
@@ -26,7 +26,17 @@ const Calendar = () => {
             nextAiringEpisode {
               airingAt
               episode
+              timeUntilAiring
             }
+            airingSchedule {
+              nodes {
+                airingAt
+                episode
+                timeUntilAiring
+              }
+            }
+            status
+            episodes
           }
         }
       }
@@ -58,70 +68,67 @@ const Calendar = () => {
         throw new Error(data.errors[0].message);
       }
 
-      setAnimeData(data.data.Page.media);
+      const processedData = data.data.Page.media.map(anime => ({
+        ...anime,
+        airingSchedule: anime.airingSchedule?.nodes || []
+      }));
+
+      setAnimeData(processedData);
       setLoading(false);
       setError(null);
       
-      // Store data in localStorage as a cache
       localStorage.setItem('animeCalendarData', JSON.stringify({
-        data: data.data.Page.media,
+        data: processedData,
         timestamp: Date.now()
       }));
 
     } catch (err) {
       console.error('Fetch error:', err);
-      
-      // If we have cached data, use it temporarily
-      const cachedData = localStorage.getItem('animeCalendarData');
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
-        // Use cached data if it's less than 1 hour old
-        if (Date.now() - timestamp < 3600000) {
-          setAnimeData(data);
-          setLoading(false);
-          setError('Using cached data. Please refresh later.');
-          return;
-        }
-      }
+      handleError(err, retry);
+    }
+  };
 
-      // Implement exponential backoff for retries
-      if (retry < 3) {
-        setError(`Retrying... Attempt ${retry + 1}/3`);
-        await delay(Math.min(1000 * Math.pow(2, retry), 5000));
-        setRetryCount(retry + 1);
-        fetchAnimeData(retry + 1);
-      } else {
-        setError('Failed to fetch anime data. Please try refreshing the page.');
+  const handleError = async (err, retry) => {
+    const cachedData = localStorage.getItem('animeCalendarData');
+    if (cachedData) {
+      const { data, timestamp } = JSON.parse(cachedData);
+      if (Date.now() - timestamp < 3600000) {
+        setAnimeData(data);
         setLoading(false);
+        setError('Using cached data. Please refresh later.');
+        return;
       }
+    }
+
+    if (retry < 3) {
+      setError(`Retrying... Attempt ${retry + 1}/3`);
+      await delay(Math.min(1000 * Math.pow(2, retry), 5000));
+      setRetryCount(retry + 1);
+      fetchAnimeData(retry + 1);
+    } else {
+      setError('Failed to fetch anime data. Please try refreshing the page.');
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Try to load cached data first
     const cachedData = localStorage.getItem('animeCalendarData');
     if (cachedData) {
       const { data, timestamp } = JSON.parse(cachedData);
-      // Use cached data if it's less than 1 hour old
       if (Date.now() - timestamp < 3600000) {
         setAnimeData(data);
         setLoading(false);
       }
     }
     
-    // Fetch fresh data
     fetchAnimeData();
 
-    // Set up auto-refresh every 15 minutes
     const refreshInterval = setInterval(() => {
       fetchAnimeData();
     }, 900000); // 15 minutes
 
     return () => clearInterval(refreshInterval);
   }, []);
-
-  // Rest of the component code remains the same...
-  // (Keep all the existing functions and JSX)
 
   const getCurrentSeason = () => {
     const month = new Date().getMonth();
@@ -133,6 +140,14 @@ const Calendar = () => {
 
   const getCurrentYear = () => {
     return new Date().getFullYear();
+  };
+
+  const isAiringNext = (anime) => {
+    if (!anime.nextAiringEpisode) return false;
+    const nextAiringTimes = animeData
+      .filter(a => a.nextAiringEpisode)
+      .map(a => a.nextAiringEpisode.timeUntilAiring);
+    return anime.nextAiringEpisode.timeUntilAiring === Math.min(...nextAiringTimes);
   };
 
   const getDayOfWeek = (timestamp) => {
@@ -174,6 +189,7 @@ const Calendar = () => {
       });
     });
 
+    // Sort anime within each day by airing time
     Object.keys(days).forEach(day => {
       days[day].sort((a, b) => {
         if (a.airingTime === 'TBA') return 1;
@@ -183,6 +199,34 @@ const Calendar = () => {
     });
 
     return days;
+  };
+
+  const AnimeCard = ({ anime }) => {
+    const isNext = isAiringNext(anime);
+    
+    return (
+      <div className={styles.cardWrapper}>
+        {isNext && <div className={styles.airingNext}>Airing Next</div>}
+        <div className={styles.animeCard}>
+          <div className={styles.imageWrapper}>
+            <img
+              src={anime.coverImage.large}
+              alt={anime.title.english || anime.title.romaji}
+              className={styles.image}
+            />
+          </div>
+          <div className={styles.animeInfo}>
+            <h3 className={styles.animeTitle}>
+              {anime.title.english || anime.title.romaji}
+            </h3>
+            <p className={styles.episodeInfo}>
+              Ep {anime.nextAiringEpisode?.episode || '??'} 
+              {anime.airingTime !== 'TBA' ? ` airing at ${anime.airingTime}` : ' (TBA)'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (loading && !animeData.length) {
@@ -196,42 +240,24 @@ const Calendar = () => {
     <div>
       <Header />
       <div className={styles.container}>
-      {error && <div className={styles.errorBanner}>{error}</div>}
-      {orderedDays.map(day => {
-        const animeList = organizedAnime[day];
-        if (animeList.length === 0) return null;
-        
-        return (
-          <div key={day} className={styles.daySection}>
-            <h2 className={styles.dayTitle}>{day}</h2>
-            <div className={styles.animeGrid}>
-              {animeList.map(anime => (
-                <div key={anime.id} className={styles.animeCard}>
-                  <div className={styles.imageWrapper}>
-                    <img
-                      src={anime.coverImage.large}
-                      alt={anime.title.english || anime.title.romaji}
-                      className={styles.image}
-                    />
-                  </div>
-                  <div className={styles.animeInfo}>
-                    <h3 className={styles.animeTitle}>
-                      {anime.title.english || anime.title.romaji}
-                    </h3>
-                    <p className={styles.episodeInfo}>
-                      Ep {anime.nextAiringEpisode?.episode || '??'} 
-                      {anime.airingTime !== 'TBA' ? ` aired at ${anime.airingTime}` : ' (TBA)'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+        {error && <div className={styles.errorBanner}>{error}</div>}
+        {orderedDays.map(day => {
+          const animeList = organizedAnime[day];
+          if (animeList.length === 0) return null;
+          
+          return (
+            <div key={day} className={styles.daySection}>
+              <h2 className={styles.dayTitle}>{day}</h2>
+              <div className={styles.animeGrid}>
+                {animeList.map(anime => (
+                  <AnimeCard key={anime.id} anime={anime} />
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
-    </div>
-    
   );
 };
 
