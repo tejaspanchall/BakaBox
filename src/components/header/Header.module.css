@@ -4,6 +4,17 @@
   margin-bottom: 1rem;
 }
 
+.logoLink {
+  display: inline-block;
+  transition: transform 0.15s ease-in-out;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logoLink.pressed {
+  transform: scale(0.95);
+}
+
 .logo {
   width: 220px;
   height: auto;

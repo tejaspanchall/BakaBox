@@ -159,7 +159,7 @@ const LifeOnAnime = () => {
         <div className={styles.results}>
           <h2 className={styles.usernameMessage}>
            👋 Hey <span className={styles.username}>{username}</span>, <br/>
-            you've successfully wasted this much time watching an anime!
+           Congrats! You wasted this much of your time on anime instead of a new skill xD
           </h2>
           <div className={styles.clock}>
             {countingStats && (

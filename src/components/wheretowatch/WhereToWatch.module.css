@@ -18,6 +18,13 @@
   padding: 2rem 1rem;
 }
 
+.disclaimer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #888;
+}
+
 .list {
   display: flex;
   flex-direction: column;

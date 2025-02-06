@@ -27,18 +27,6 @@ const WhereToWatch = () => {
       name: 'animepahe',
       url: 'https://animepahe.ru/',
       logo: 'assets/websites/pahe.png'
-    },
-    {
-      id: 5,
-      name: 'Yugen Anime',
-      url: 'https://yugenanime.in/',
-      logo: 'assets/websites/yugen.jpg' 
-    },
-    {
-      id: 6,
-      name: 'KissAnime',
-      url: 'https://kissanime.cfd/',
-      logo: 'assets/websites/kiss.jpg'
     }
   ];
 
@@ -67,6 +55,9 @@ const WhereToWatch = () => {
             </a>
           ))}
         </div>
+      </div>
+      <div className={styles.disclaimer}>
+        <p>This list is for informational purposes only and is not intended as promotional content.</p>
       </div>
     </div>
   );
