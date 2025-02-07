@@ -1,135 +1,169 @@
+/* Global Reset & Font Setup */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Chivo', sans-serif;
-}
-
-@font-face {
-  font-family: 'Chivo';
-  src: url('/public/assets/fonts/chivo.regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-.wrapper {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Chivo', sans-serif;
+  }
+  
+  @font-face {
+    font-family: 'Chivo';
+    src: url('/public/assets/fonts/chivo.regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  /* Player Container (kept small for a mobile look on all devices) */
+  .playerContainer {
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  /* Radio Unit (Vertical Layout, same as mobile) */
+  .radioUnit {
+    background: #2d3748;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-top: 5rem;
-    width: 100%;
-}
-
-.title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    gap: 1rem;
+  }
+  
+  /* Top Panel */
+  .topPanel {
+    background: #1a202c;
+    border-radius: 8px;
     padding: 1rem;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.radio {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 100%;
-    min-width: 320px;
-    max-width: 500px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1.25rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-}
-
-.radio:hover {
-    transform: translateY(-2px);
-}
-
-.playButton {
-    background: #007bff;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    min-width: 48px;
-    min-height: 48px;
-    flex-shrink: 0;
+  }
+  
+  .indicators {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .led {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  .ledRed {
+    background: #f56565;
+  }
+  
+  .ledYellow {
+    background: #ecc94b;
+  }
+  
+  .ledGreen {
+    background: #48bb78;
+  }
+  
+  /* Speaker Icon */
+  .speakerIcon {
+    width: 32px;
+    height: 32px;
+    background: #1a202c;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
-}
-
-.playButton:hover {
-    background: #0056b3;
-}
-
-.trackInfo {
-    flex: 1;
-    min-width: 0;
-    text-align: left;
-}
-
-.trackInfo .title {
-    color: #333;
-    font-size: 1rem;
+  }
+  
+  .speakerHoles {
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(#2d3748 20%, transparent 20%);
+    background-position: 0 0;
+    background-size: 8px 8px;
+  }
+  
+  /* Display Panel */
+  .display {
+    background: #2b4c7c;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  
+  .displayContent {
+    background: #bcdaf7;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .title {
+    color: #1a365d;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 0.2rem;
-    text-align: left;
+    margin-bottom: 0.5rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.trackInfo .artist {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 0.2rem;
-    text-align: left;
+  }
+  
+  .artist {
+    color: #2a4365;
+    font-size: 1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.listeners {
+  }
+  
+  /* Tuner (Progress Bar) */
+  .tuner {
+    height: 48px;
+    background: #4a5568;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tunerIndicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #4299e1;
+    transition: none;
+  }
+  
+  /* Controls */
+  .controls {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .playButton {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    background: #4299e1;
+    color: white;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    color: #888;
-    font-size: 0.8rem;
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 1rem;
-    }
-    
-    .radio {
-        min-width: 280px;
-        padding: 1rem;
-    }
-
-    .title {
-        font-size: 1.5rem;
-    }
-
-    .trackInfo .title {
-        font-size: 0.9rem;
-    }
-
-    .trackInfo .artist {
-        font-size: 0.8rem;
-    }
-}
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(66, 153, 225, 0.3);
+  }
+  
+  .playButton:hover {
+    background: #3182ce;
+    transform: scale(1.05);
+  }
+  
+  .playButton:active {
+    transform: scale(0.95);
+  }
+  
+  /* The mobile layout (spacing, fonts, sizes) is maintained on all devices. */
+  
