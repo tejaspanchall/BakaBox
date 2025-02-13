@@ -12,77 +12,69 @@
   font-style: normal;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+}
+
 .loadingContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: white;
 }
 
 .loadingGif {
-  width: 200px;
-  height: 200px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
 }
 
-.container {
-  background-color: white;
-  padding: 40px 20px 100px 20px;
-  position: relative;
-  min-height: 100vh;
-}
-
-.content {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.mainInfo {
+.card {
   display: flex;
-  gap: 60px;
-  background-color: #e0e0e0;
-  padding: 60px;
+  gap: 40px;
+  background-color: #f5f5f5;
+  padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-height: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
-.coverImageContainer {
+.imageSection {
   flex-shrink: 0;
 }
 
 .coverImage {
-  width: 300px;
-  height: 425px;
+  width: 240px;
+  height: 340px;
   object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.infoContainer {
+.contentSection {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 900px;
+  gap: 20px;
 }
 
 .title {
-  font-size: 30px;
+  font-size: 32px;
   font-weight: bold;
-  margin: 0 0 24px 0;
   color: #333;
+  margin: 0;
   line-height: 1.2;
 }
 
-.metadata {
+.stats {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
 }
 
 .dot {
@@ -92,32 +84,27 @@
 .genres {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 10px;
 }
 
 .genre {
   background-color: #447ead;
   color: white;
-  padding: 8px 20px;
-  border-radius: 24px;
+  padding: 6px 16px;
+  border-radius: 20px;
   font-size: 14px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
 
 .genre:hover {
   background-color: #5f99c8;
 }
 
-.descriptionContainer {
-  margin-bottom: 32px;
-}
-
 .description {
   color: #444;
-  line-height: 1.8;
+  line-height: 1.7;
   font-size: 16px;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 .readMoreButton {
@@ -125,31 +112,31 @@
   border: none;
   color: #447ead;
   cursor: pointer;
-  font-size: 14px;
+  font-size: inherit;
   padding: 0;
   text-decoration: underline;
-  transition: color 0.2s ease;
+  margin-left: 5px;
 }
 
 .readMoreButton:hover {
   color: #5f99c8;
 }
 
-.fixedButtonContainer {
+.buttonContainer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   background-color: white;
-  padding: 24px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   z-index: 1000;
 }
 
-.button {
-  display: inline-flex;
+.refreshButton {
+  display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 32px;
@@ -158,52 +145,39 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 16px;
   font-weight: 500;
+  transition: all 0.2s;
 }
 
-.button:hover:not(:disabled) {
+.refreshButton:hover:not(:disabled) {
   background-color: #5f99c8;
   transform: translateY(-2px);
 }
 
-.button:disabled {
+.refreshButton:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 20px 20px 100px 20px;
+    padding: 20px;
   }
 
-  .mainInfo {
+  .card {
     flex-direction: column;
     align-items: center;
-    padding: 24px;
-    gap: 24px;
+    padding: 30px;
+    gap: 30px;
   }
 
-  .coverImageContainer {
+  .imageSection {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -211,41 +185,37 @@
 
   .coverImage {
     width: 200px;
-    height: 285px;
+    height: 300px;
   }
 
-  .infoContainer {
+  .contentSection {
     text-align: center;
   }
 
   .title {
     font-size: 28px;
-    margin-bottom: 16px;
   }
 
-  .metadata {
+  .stats {
     justify-content: center;
-    font-size: 16px;
-    gap: 12px;
+    font-size: 15px;
   }
 
   .genres {
     justify-content: center;
-    gap: 8px;
-  }
-
-  .genre {
-    padding: 6px 16px;
-    font-size: 14px;
   }
 
   .description {
     text-align: left;
-    font-size: 16px;
+    font-size: 15px;
   }
 
-  .button {
-    padding: 12px 24px;
-    font-size: 16px;
+  .buttonContainer {
+    padding: 16px;
+  }
+
+  .refreshButton {
+    padding: 14px 28px;
+    font-size: 15px;
   }
 }
