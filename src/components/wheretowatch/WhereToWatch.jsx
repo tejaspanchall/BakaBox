@@ -24,7 +24,7 @@ const WhereToWatch = () => {
     },
     {
       id: 4,
-      name: 'animepahe',
+      name: 'AnimePahe',
       url: 'https://animepahe.ru/',
       logo: 'assets/websites/pahe.png'
     }

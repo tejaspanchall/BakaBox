@@ -36,9 +36,9 @@ const Home = () => {
     { image: "/assets/home/LifeOnAnime.jpg", route: "/life-on-anime" },
     { image: "/assets/home/Radio.jpg", route: "/radio" },
     { image: "/assets/home/Live.jpg", route: "/where-to-watch" },
-    { image: "/assets/home/Image2.jpg", route: "/sub-vs-dub" },
-    { image: "/assets/home/Image1.jpg", route: "/websites" },
-    { image: "/assets/home/Image2.jpg", route: "/websites" }
+    // { image: "/assets/home/Image2.jpg", route: "/sub-vs-dub" },
+    // { image: "/assets/home/Image1.jpg", route: "/websites" },
+    // { image: "/assets/home/Image2.jpg", route: "/websites" }
   ];
 
   return (
