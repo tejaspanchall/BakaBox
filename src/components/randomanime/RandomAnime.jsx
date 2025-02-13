@@ -96,7 +96,7 @@ const RandomAnime = () => {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <img src="/loading-anime.gif" alt="Loading..." className={styles.loadingGif} />
+        <img src="/assets/loading.gif" alt="Loading..." className={styles.loadingGif} />
       </div>
     );
   }
