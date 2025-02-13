@@ -230,8 +230,12 @@ const Calendar = () => {
   };
 
   if (loading && !animeData.length) {
-    return <div className={styles.loading}>Loading...</div>;
-  }
+    return (
+      <div className={styles.loading}>
+        <img src="/assets/loading.gif" alt="Loading..." className={styles.loadingGif} />
+      </div>
+    );
+  } 
 
   const organizedAnime = organizeAnimeByDay();
   const orderedDays = getOrderedDays();
