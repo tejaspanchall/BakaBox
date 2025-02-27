@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
-import styles from './RandomAnime.module.css';
 import Header from '../header/Header';
 
 const RandomAnime = () => {
@@ -80,54 +79,57 @@ const RandomAnime = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchRandomAnime();
   }, []);
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <img src="/assets/loading.gif" alt="Loading..." className={styles.loadingGif} />
+      <div className="flex justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
+        <img src="/assets/loading.gif" alt="Loading..." className="w-30 h-30 object-contain" />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="font-['Chivo',_sans-serif]">
       <Header />
-      <div className={styles.container}>
-        <div className={styles.card}>
-          <div className={styles.imageSection}>
+      <div className="max-w-[1200px] mx-auto px-5 py-10 min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-10 bg-gray-100 p-8 md:p-10 rounded-2xl shadow-md mb-8">
+          <div className="flex-shrink-0 flex justify-center">
             <img
               src={anime.coverImage}
               alt={anime.title}
-              className={styles.coverImage}
+              className="w-[200px] h-[300px] md:w-[240px] md:h-[340px] object-cover rounded-xl shadow-md"
             />
           </div>
           
-          <div className={styles.contentSection}>
-            <h1 className={styles.title}>{anime.title}</h1>
+          <div className="flex-1 flex flex-col gap-5 text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight">{anime.title}</h1>
             
-            <div className={styles.stats}>
+            <div className="flex items-center gap-4 text-base text-gray-600 justify-center md:justify-start">
               <span>{anime.episodes} Episodes</span>
-              <span className={styles.dot}>•</span>
+              <span className="text-gray-400">•</span>
               <span>{anime.meanScore}% Rating</span>
             </div>
 
-            <div className={styles.genres}>
+            <div className="flex flex-wrap gap-2.5 justify-center md:justify-start">
               {anime.genres.slice(0, 4).map((genre, index) => (
-                <span key={index} className={styles.genre}>
+                <span 
+                  key={index} 
+                  className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm transition-colors duration-200 hover:bg-blue-500"
+                >
                   {genre}
                 </span>
               ))}
             </div>
 
-            <p className={styles.description}>
+            <p className="text-gray-700 leading-relaxed text-base text-left">
               {showFullDescription ? anime.description : truncateDescription(anime.description)}
               {anime.description.split(' ').length > 50 && (
                 <button 
                   onClick={() => setShowFullDescription(!showFullDescription)}
-                  className={styles.readMoreButton}
+                  className="bg-transparent border-none text-blue-600 cursor-pointer text-base p-0 underline ml-1 hover:text-blue-500"
                 >
                   {showFullDescription ? ' Show Less' : ' Read More'}
                 </button>
@@ -137,13 +139,13 @@ const RandomAnime = () => {
         </div>
       </div>
 
-      <div className={styles.buttonContainer}>
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-5 shadow-lg flex justify-center z-10">
         <button
           onClick={fetchRandomAnime}
           disabled={loading}
-          className={styles.refreshButton}
+          className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white border-none rounded-xl cursor-pointer text-base font-medium transition-all duration-200 hover:bg-blue-500 hover:translate-y-[-2px] disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          <RefreshCw className={styles.icon} />
+          <RefreshCw className="w-5 h-5" />
           Get Random Anime
         </button>
       </div>

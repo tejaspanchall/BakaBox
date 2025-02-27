@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Calender.module.css';
 import Header from '../header/Header';
 
 const Calendar = () => {
@@ -205,21 +204,25 @@ const Calendar = () => {
     const isNext = isAiringNext(anime);
     
     return (
-      <div className={styles.cardWrapper}>
-        {isNext && <div className={styles.airingNext}>Airing Next</div>}
-        <div className={styles.animeCard}>
-          <div className={styles.imageWrapper}>
+      <div className="relative pt-3">
+        {isNext && (
+          <div className="absolute top-0 right-[-5px] bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium z-10">
+            Airing Next
+          </div>
+        )}
+        <div className="bg-gray-200 rounded-lg overflow-hidden shadow flex items-center p-3 h-20 transition-transform duration-200 ease-in-out hover:translate-y-[-2px] hover:shadow-md">
+          <div className="flex-shrink-0 mr-4 relative w-[45px] h-[60px]">
             <img
               src={anime.coverImage.large}
               alt={anime.title.english || anime.title.romaji}
-              className={styles.image}
+              className="w-full h-full object-cover rounded"
             />
           </div>
-          <div className={styles.animeInfo}>
-            <h3 className={styles.animeTitle}>
+          <div className="flex-1 min-w-0">
+            <h3 className="m-0 text-base text-gray-800 font-semibold mb-1 truncate">
               {anime.title.english || anime.title.romaji}
             </h3>
-            <p className={styles.episodeInfo}>
+            <p className="m-0 text-sm text-gray-600">
               Ep {anime.nextAiringEpisode?.episode || '??'} 
               {anime.airingTime !== 'TBA' ? ` airing at ${anime.airingTime}` : ' (TBA)'}
             </p>
@@ -231,8 +234,8 @@ const Calendar = () => {
 
   if (loading && !animeData.length) {
     return (
-      <div className={styles.loading}>
-        <img src="/assets/loading.gif" alt="Loading..." className={styles.loadingGif} />
+      <div className="text-center p-8 text-lg text-gray-600 font-['Chivo',_sans-serif]">
+        <img src="/assets/loading.gif" alt="Loading..." className="w-30 h-30 object-contain mx-auto" />
       </div>
     );
   } 
@@ -241,18 +244,22 @@ const Calendar = () => {
   const orderedDays = getOrderedDays();
 
   return (
-    <div>
+    <div className="font-['Chivo',_sans-serif]">
       <Header />
-      <div className={styles.container}>
-        {error && <div className={styles.errorBanner}>{error}</div>}
+      <div className="max-w-[1400px] mx-auto px-8">
+        {error && (
+          <div className="bg-yellow-50 text-yellow-800 p-3 mb-4 border border-yellow-200 rounded text-center">
+            {error}
+          </div>
+        )}
         {orderedDays.map(day => {
           const animeList = organizedAnime[day];
           if (animeList.length === 0) return null;
           
           return (
-            <div key={day} className={styles.daySection}>
-              <h2 className={styles.dayTitle}>{day}</h2>
-              <div className={styles.animeGrid}>
+            <div key={day} className="mb-12">
+              <h2 className="text-2xl text-gray-700 mb-4 font-semibold">{day}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {animeList.map(anime => (
                   <AnimeCard key={anime.id} anime={anime} />
                 ))}

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import Header from '../header/Header';
-import styles from './LifeOnAnime.module.css';
 
 const TimeUnit = ({ value, label }) => {
   return (
-    <div className={styles.timeUnit}>
-      <div className={styles.value}>{String(value).padStart(2, '0')}</div>
-      <span className={styles.label}>{label}</span>
+    <div className="flex flex-col items-center gap-2 sm:gap-2">
+      <div className="font-mono text-[#1f2937] font-semibold text-center min-w-[2ch] text-[2.5rem] sm:text-[4rem]">
+        {String(value).padStart(2, '0')}
+      </div>
+      <span className="font-mono text-[#6b7280] text-[0.75rem] sm:text-[0.875rem] tracking-wider">
+        {label}
+      </span>
     </div>
   );
 };
@@ -126,65 +129,73 @@ const LifeOnAnime = () => {
   };
 
   return (
-    <div>
+    <div className="font-['Chivo',_sans-serif] box-border m-0 p-0">
       <Header />
-    <div className={styles.mainContainer}>
-      {!submitted ? (
-        <div className={styles.formSection}>
-          <div className={styles.header}>
-            <h1>⏳ Your Life on Anime</h1>
-            <br />
-            <h4>Enter your AniList username</h4>
-          </div>
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <input
-              type="text"
-              placeholder="eg. joyboy"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className={styles.input}
-              disabled={isLoading}
-            />
-            <button 
-              type="submit" 
-              className={styles.button}
-              disabled={isLoading || !username}
-            >
-              {isLoading ? '🔄' : '✨'}
-            </button>
-          </form>
-          {error && <div className={styles.error}>{error}</div>}
-        </div>
-      ) : (
-        <div className={styles.results}>
-          <h2 className={styles.usernameMessage}>
-           👋 Hey <span className={styles.username}>{username}</span>, <br/>
-           Congrats! You wasted this much of your time on anime instead of a new skill xD
-          </h2>
-          <div className={styles.clock}>
-            {countingStats && (
-              <>
-                <TimeUnit value={countingStats.years} label="YEARS" />
-                <div className={styles.separator}>:</div>
-                <TimeUnit value={countingStats.months} label="MONTHS" />
-                <div className={styles.separator}>:</div>
-                <TimeUnit value={countingStats.days} label="DAYS" />
-                <div className={styles.separator}>:</div>
-                <TimeUnit value={countingStats.hours} label="HOURS" />
-                <div className={styles.separator}>:</div>
-                <TimeUnit value={countingStats.minutes} label="MINS" />
-              </>
+      <div className="p-16 sm:p-4 sm:pt-8 max-sm:p-2 max-sm:pt-8">
+        {!submitted ? (
+          <div className="max-w-md mx-auto px-4">
+            <div className="text-center mb-8">
+              <h1 className="text-[1.5rem] sm:text-[2.25rem] font-bold text-[#1f2937]">
+                ⏳ Your Life on Anime
+              </h1>
+              <br />
+              <h4 className="text-[#364252]">
+                Enter your AniList username
+              </h4>
+            </div>
+            <form onSubmit={handleSubmit} className="flex gap-2 max-sm:flex-col">
+              <input
+                type="text"
+                placeholder="eg. joyboy"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="flex-1 p-3 border-2 border-[#e5e7eb] rounded-lg text-base outline-none focus:border-[#3b82f6] transition-colors"
+                disabled={isLoading}
+              />
+              <button 
+                type="submit" 
+                className="px-6 py-3 bg-[#3b82f6] text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-[#2563eb] disabled:opacity-50 disabled:cursor-not-allowed max-sm:w-full"
+                disabled={isLoading || !username}
+              >
+                {isLoading ? '🔄' : '✨'}
+              </button>
+            </form>
+            {error && (
+              <div className="mt-4 p-3 bg-[#fee2e2] text-[#dc2626] rounded-lg">
+                {error}
+              </div>
             )}
           </div>
-          <button
-            onClick={handleReset}
-            className={styles.resetButton}
-          >
-            🔄 Reset
-          </button>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="max-w-6xl mx-auto px-4 text-center">
+            <h2 className="text-[1.25rem] sm:text-[1.5rem] mb-8 leading-relaxed">
+              👋 Hey <span className="font-bold text-[#3b82f6]">{username}</span>, <br/>
+              Congrats! You wasted this much of your time on anime instead of a new skill xD
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4 p-4 sm:p-8 mx-auto max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:py-4 max-sm:px-0 max-sm:gap-1 max-sm:w-full max-sm:scrollbar-hide">
+              {countingStats && (
+                <>
+                  <TimeUnit value={countingStats.years} label="YEARS" />
+                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                  <TimeUnit value={countingStats.months} label="MONTHS" />
+                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                  <TimeUnit value={countingStats.days} label="DAYS" />
+                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                  <TimeUnit value={countingStats.hours} label="HOURS" />
+                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                  <TimeUnit value={countingStats.minutes} label="MINS" />
+                </>
+              )}
+            </div>
+            <button
+              onClick={handleReset}
+              className="mt-8 px-6 py-3 bg-[#3b82f6] text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-[#2563eb]"
+            >
+              🔄 Reset
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

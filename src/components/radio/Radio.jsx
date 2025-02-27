@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { PlayIcon, PauseIcon } from 'lucide-react';
 import Header from '../header/Header';
-import styles from './Radio.module.css';
 
 const HEARTBEAT_INTERVAL = 45000;
 const STREAM_URL = 'https://listen.moe/stream';
@@ -119,54 +118,79 @@ const Radio = () => {
   };
 
   return (
-    <div>
+    <div className="m-0 p-0 box-border font-['Chivo',_sans-serif]">
       <Header />
-      <div className={styles.playerContainer}>
-        <div className={styles.radioUnit}>
-          <div className={styles.topPanel}>
-            <div className={styles.indicators}>
-              <div className={`${styles.led} ${styles.ledRed}`}></div>
-              <div className={`${styles.led} ${styles.ledYellow}`}></div>
-              <div className={`${styles.led} ${styles.ledGreen}`}></div>
+      <div className="w-full max-w-[400px] mx-auto my-8 px-4">
+        <div className="bg-[#2d3748] rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.2)] flex flex-col gap-4">
+          <div className="bg-[#1a202c] rounded-lg p-4 flex justify-between items-center">
+            <div className="flex gap-2">
+              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#f56565]"></div>
+              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#ecc94b]"></div>
+              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#48bb78]"></div>
             </div>
-            <div className={styles.speakerIcon}>
-              <div className={styles.speakerHoles}></div>
+            <div className="w-8 h-8 bg-[#1a202c] rounded flex items-center justify-center">
+              <div className="w-full h-full bg-[radial-gradient(#2d3748_20%,transparent_20%)] bg-[0_0] bg-[length:8px_8px]"></div>
             </div>
           </div>
           
-          <div className={styles.display}>
-            <div className={styles.displayContent}>
-              <h2 className={styles.title}>{currentTrack.title}</h2>
-              <p className={styles.artist}>{currentTrack.artist}</p>
+          <div className="bg-[#2b4c7c] rounded-lg p-4">
+            <div className="bg-[#bcdaf7] p-4 rounded text-center">
+              <h2 className="text-[#1a365d] text-xl font-semibold mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+                {currentTrack.title}
+              </h2>
+              <p className="text-[#2a4365] text-base whitespace-nowrap overflow-hidden text-ellipsis">
+                {currentTrack.artist}
+              </p>
             </div>
           </div>
 
-          <div className={styles.waveformContainer}>
+          <div className="h-12 my-4 bg-[#1a202c] rounded-lg p-2 overflow-hidden relative">
             <svg
-              className={`${styles.waveform} ${isPlaying ? styles.waveformActive : ''}`}
+              className={`w-full h-full ${isPlaying ? 'animate-wave' : ''}`}
               viewBox="0 0 1000 100"
               preserveAspectRatio="none"
             >
               <path
-                className={styles.wave}
+                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
                 d={generateWavePath()}
+                style={{
+                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none'
+                }}
               />
               <path
-                className={styles.wave}
+                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
                 d={generateWavePath()}
-                style={{ animationDelay: '-1.2s' }}
+                style={{
+                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none',
+                  animationDelay: '-1.2s'
+                }}
               />
               <path
-                className={styles.wave}
+                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
                 d={generateWavePath()}
-                style={{ animationDelay: '-2.4s' }}
+                style={{
+                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none',
+                  animationDelay: '-2.4s'
+                }}
               />
             </svg>
+            <style jsx>{`
+              @keyframes waveFlow {
+                0% {
+                  transform: translateX(0%);
+                  opacity: 0.5;
+                }
+                100% {
+                  transform: translateX(-50%);
+                  opacity: 0.2;
+                }
+              }
+            `}</style>
           </div>
 
-          <div className={styles.controls}>
+          <div className="flex justify-center">
             <button 
-              className={styles.playButton} 
+              className="w-16 h-16 rounded-full border-none bg-[#4299e1] text-white cursor-pointer flex items-center justify-center transition-all duration-200 ease-linear shadow-[0_4px_6px_rgba(66,153,225,0.3)] hover:bg-[#3182ce] hover:scale-105 active:scale-95"
               onClick={togglePlayPause}
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
