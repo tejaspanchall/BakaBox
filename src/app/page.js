@@ -45,7 +45,7 @@ const Home = () => {
       <Header />
       {quote && (
         <div className="text-center p-4 bg-white rounded-lg">
-          <p className="text-lg italic text-gray-800">"{quote.quote}"</p>
+          <p className="text-lg italic text-gray-800">&ldquo;{quote.quote}&rdquo;</p>
           <p className="text-sm text-gray-600 mt-2">- {quote.character} ({quote.show})</p>
         </div>
       )}
