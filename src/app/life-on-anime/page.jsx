@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import Header from '../header/Header';
+'use client';
+
+import { useState } from 'react';
+import Header from '@/components/header/Header';
 
 const TimeUnit = ({ value, label }) => {
   return (
@@ -129,7 +131,7 @@ const LifeOnAnime = () => {
   };
 
   return (
-    <div className="font-['Chivo',_sans-serif] box-border m-0 p-0">
+    <div className="box-border m-0 p-0">
       <Header />
       <div className="p-16 sm:p-4 sm:pt-8 max-sm:p-2 max-sm:pt-8">
         {!submitted ? (

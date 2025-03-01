@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Header from '../header/Header';
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Header from '@/components/header/Header';
 
 const Calendar = () => {
   const [animeData, setAnimeData] = useState([]);
@@ -76,10 +79,12 @@ const Calendar = () => {
       setLoading(false);
       setError(null);
       
-      localStorage.setItem('animeCalendarData', JSON.stringify({
-        data: processedData,
-        timestamp: Date.now()
-      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('animeCalendarData', JSON.stringify({
+          data: processedData,
+          timestamp: Date.now()
+        }));
+      }
 
     } catch (err) {
       console.error('Fetch error:', err);
@@ -88,14 +93,16 @@ const Calendar = () => {
   };
 
   const handleError = async (err, retry) => {
-    const cachedData = localStorage.getItem('animeCalendarData');
-    if (cachedData) {
-      const { data, timestamp } = JSON.parse(cachedData);
-      if (Date.now() - timestamp < 3600000) {
-        setAnimeData(data);
-        setLoading(false);
-        setError('Using cached data. Please refresh later.');
-        return;
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem('animeCalendarData');
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < 3600000) {
+          setAnimeData(data);
+          setLoading(false);
+          setError('Using cached data. Please refresh later.');
+          return;
+        }
       }
     }
 
@@ -111,12 +118,14 @@ const Calendar = () => {
   };
 
   useEffect(() => {
-    const cachedData = localStorage.getItem('animeCalendarData');
-    if (cachedData) {
-      const { data, timestamp } = JSON.parse(cachedData);
-      if (Date.now() - timestamp < 3600000) {
-        setAnimeData(data);
-        setLoading(false);
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem('animeCalendarData');
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < 3600000) {
+          setAnimeData(data);
+          setLoading(false);
+        }
       }
     }
     
@@ -212,9 +221,11 @@ const Calendar = () => {
         )}
         <div className="bg-gray-200 rounded-lg overflow-hidden shadow flex items-center p-3 h-20 transition-transform duration-200 ease-in-out hover:translate-y-[-2px] hover:shadow-md">
           <div className="flex-shrink-0 mr-4 relative w-[45px] h-[60px]">
-            <img
+            <Image
               src={anime.coverImage.large}
               alt={anime.title.english || anime.title.romaji}
+              width={45}
+              height={60}
               className="w-full h-full object-cover rounded"
             />
           </div>
@@ -234,8 +245,8 @@ const Calendar = () => {
 
   if (loading && !animeData.length) {
     return (
-      <div className="text-center p-8 text-lg text-gray-600 font-['Chivo',_sans-serif]">
-        <img src="/assets/loading.gif" alt="Loading..." className="w-30 h-30 object-contain mx-auto" />
+      <div className="flex justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
+        <img src="/loading.gif" alt="Loading..." className="w-30 h-30 object-contain" />
       </div>
     );
   } 
@@ -244,7 +255,7 @@ const Calendar = () => {
   const orderedDays = getOrderedDays();
 
   return (
-    <div className="font-['Chivo',_sans-serif]">
+    <div>
       <Header />
       <div className="max-w-[1400px] mx-auto px-8">
         {error && (

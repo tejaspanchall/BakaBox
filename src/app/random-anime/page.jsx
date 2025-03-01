@@ -1,7 +1,10 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
-import Header from '../header/Header';
-
+import Image from 'next/image';
+import Header from '@/components/header/Header';
+ 
 const RandomAnime = () => {
   const [anime, setAnime] = useState({
     title: '',
@@ -86,7 +89,7 @@ const RandomAnime = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
-        <img src="/assets/loading.gif" alt="Loading..." className="w-30 h-30 object-contain" />
+        <img src="/loading.gif" alt="Loading..." className="w-35 h-35 object-contain" />
       </div>
     );
   }
@@ -97,11 +100,14 @@ const RandomAnime = () => {
       <div className="max-w-[1200px] mx-auto px-5 py-10 min-h-[calc(100vh-200px)]">
         <div className="flex flex-col md:flex-row gap-8 md:gap-10 bg-gray-100 p-8 md:p-10 rounded-2xl shadow-md mb-8">
           <div className="flex-shrink-0 flex justify-center">
-            <img
-              src={anime.coverImage}
-              alt={anime.title}
-              className="w-[200px] h-[300px] md:w-[240px] md:h-[340px] object-cover rounded-xl shadow-md"
-            />
+            <div className="relative w-[200px] h-[300px] md:w-[240px] md:h-[340px]">
+              <Image
+                src={anime.coverImage}
+                alt={anime.title}
+                fill
+                className="object-cover rounded-xl shadow-md"
+              />
+            </div>
           </div>
           
           <div className="flex-1 flex flex-col gap-5 text-center md:text-left">

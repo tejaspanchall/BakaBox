@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../header/Header';
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import Header from '@/components/header/Header';
 
 const Home = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [quote, setQuote] = useState(null);
 
   useEffect(() => {
@@ -30,15 +33,15 @@ const Home = () => {
 
   // 1000px x 377px
   const cards = [
-    { image: "/assets/home/Random.jpg", route: "/random-anime" },
-    { image: "/assets/home/Calender.jpg", route: "/calender" },
-    { image: "/assets/home/LifeOnAnime.jpg", route: "/life-on-anime" },
-    { image: "/assets/home/Radio.jpg", route: "/radio" },
-    { image: "/assets/home/Live.jpg", route: "/where-to-watch" }
+    { image: "/home/Random.jpg", route: "/random-anime" },
+    { image: "/home/Calender.jpg", route: "/calender" },
+    { image: "/home/LifeOnAnime.jpg", route: "/life-on-anime" },
+    { image: "/home/Radio.jpg", route: "/radio" },
+    { image: "/home/Live.jpg", route: "/where-to-watch" }
   ];
 
   return (
-    <div style={{ fontFamily: 'Chivo, sans-serif' }}>
+    <div>
       <Header />
       {quote && (
         <div className="text-center p-4 bg-white rounded-lg">
@@ -51,13 +54,15 @@ const Home = () => {
           {cards.map((card, index) => (
             <div
               key={index}
-              onClick={() => navigate(card.route)}
+              onClick={() => router.push(card.route)}
               className="rounded-3xl p-3 cursor-pointer flex justify-center items-center transition-all duration-200 ease-in-out hover:opacity-90"
-              style={{ transform: 'scale(1)', ':hover': { transform: 'scale(1.02)' } }}
+              style={{ transform: 'scale(1)' }}
             >
-              <img 
+              <Image 
                 src={card.image} 
                 alt="Card" 
+                width={1000}
+                height={377}
                 className="w-full h-full object-cover rounded-2xl border-black" 
                 style={{ borderWidth: '3px' }}
               />
@@ -77,12 +82,12 @@ const Home = () => {
               ☕ Buy Me a Coffee
             </a>
           </div>
-          <a 
+          <Link 
             href="/privacy-policy" 
             className="block text-xs text-gray-700 no-underline hover:text-gray-900"
           >
             Privacy Policy
-          </a>
+          </Link>
         </footer>
       </div>
     </div>

@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect, useRef } from 'react';
 import { PlayIcon, PauseIcon } from 'lucide-react';
-import Header from '../header/Header';
+import Header from '@/components/header/Header';
 
 const HEARTBEAT_INTERVAL = 45000;
 const STREAM_URL = 'https://listen.moe/stream';

@@ -1,5 +1,7 @@
-import React from 'react';
-import Header from '../header/Header';
+"use client";
+
+import Image from 'next/image';
+import Header from '@/components/header/Header';
 
 const WhereToWatch = () => {
   const websiteList = [
@@ -7,25 +9,25 @@ const WhereToWatch = () => {
       id: 1,
       name: 'Miruro',
       url: 'https://www.miruro.tv/',
-      logo: 'assets/websites/miruro.jpeg'
+      logo: '/websites/miruro.jpeg'
     },
     {
       id: 2,
       name: 'HiAnime',
       url: 'https://hianime.to/',
-      logo: 'assets/websites/hi.png'
+      logo: '/websites/hi.png'
     },
     {
       id: 3,
       name: 'AniTaku (Gogo Anime)',
       url: 'https://anitaku.io/',
-      logo: 'assets/websites/gogo.png'
+      logo: '/websites/gogo.png'
     },
     {
       id: 4,
       name: 'AnimePahe',
       url: 'https://animepahe.ru/',
-      logo: 'assets/websites/pahe.png'
+      logo: '/websites/pahe.png'
     }
   ];
 
@@ -44,11 +46,14 @@ const WhereToWatch = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-[rgba(59,130,246,0.05)] to-transparent opacity-0 transition-opacity duration-200 ease-linear group-hover:opacity-100"></div>
               
-              <img
-                src={website.logo}
-                alt={`${website.name} logo`}
-                className="w-14 h-14 sm:w-12 sm:h-12 rounded-xl object-cover flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-white p-1 border border-[rgba(226,232,240,0.8)]"
-              />
+              <div className="relative w-14 h-14 sm:w-12 sm:h-12">
+                <Image
+                  src={website.logo}
+                  alt={`${website.name} logo`}
+                  fill
+                  className="rounded-xl object-cover flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-white p-1 border border-[rgba(226,232,240,0.8)]"
+                />
+              </div>
               
               <div className="flex-grow min-w-0 pr-4">
                 <h2 className="text-lg font-semibold text-[#1e293b] m-0 leading-[1.4] transition-colors duration-200 ease-linear group-hover:text-[#3b82f6]">
