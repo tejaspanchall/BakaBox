@@ -97,59 +97,120 @@ const RandomAnime = () => {
   return (
     <div className="font-['Chivo',_sans-serif]">
       <Header />
-      <div className="max-w-[1200px] mx-auto px-5 py-10 min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-10 bg-gray-100 p-8 md:p-10 rounded-2xl shadow-md mb-8">
-          <div className="flex-shrink-0 flex justify-center">
-            <div className="relative w-[200px] h-[300px] md:w-[240px] md:h-[340px]">
-              <Image
-                src={anime.coverImage}
-                alt={anime.title}
-                fill
-                className="object-cover rounded-xl shadow-md"
-              />
+      <div className="max-w-[1200px] mx-auto px-5 py-6 md:py-10 min-h-[calc(100vh-200px)] mb-12 md:mb-15">
+        <div className="bg-gray-100 p-5 md:p-10 rounded-2xl shadow-md mb-8">
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            <div className="flex gap-4">
+              {/* Image Container */}
+              <div className="w-1/3">
+                <div className="relative w-full pt-[150%] rounded-lg overflow-hidden shadow-md">
+                  <Image
+                    src={anime.coverImage}
+                    alt={anime.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Title and Details Container - Removed line-clamp-2 from title */}
+              <div className="w-2/3 flex flex-col justify-start">
+                <h1 className="text-xl font-bold text-gray-800 mb-2">{anime.title}</h1>
+                
+                <div className="flex flex-col gap-1 mb-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>{anime.episodes} Episodes</span>
+                    <span className="text-gray-400">•</span>
+                    <span>{anime.meanScore}% Rating</span>
+                  </div>
+                </div>
+
+                {/* Show all genres rather than slicing */}
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  {anime.genres.map((genre, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-[#4D55CC] text-white px-2 py-0.5 rounded-full text-xs mb-1"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Description - Full Width Below on Mobile */}
+            <div className="mt-5 pt-4 border-t border-gray-200">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                {showFullDescription ? anime.description : truncateDescription(anime.description, 40)}
+                {anime.description.split(' ').length > 40 && (
+                  <button 
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="bg-transparent border-none text-[#4D55CC] cursor-pointer text-sm p-0 underline ml-1"
+                  >
+                    {showFullDescription ? ' Show Less' : ' Read More'}
+                  </button>
+                )}
+              </p>
             </div>
           </div>
-          
-          <div className="flex-1 flex flex-col gap-5 text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight">{anime.title}</h1>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex flex-row gap-10">
+            <div className="flex-shrink-0">
+              <div className="relative w-[240px] h-[340px]">
+                <Image
+                  src={anime.coverImage}
+                  alt={anime.title}
+                  fill
+                  className="object-cover rounded-xl shadow-md"
+                />
+              </div>
+            </div>
             
-            <div className="flex items-center gap-4 text-base text-gray-600 justify-center md:justify-start">
-              <span>{anime.episodes} Episodes</span>
-              <span className="text-gray-400">•</span>
-              <span>{anime.meanScore}% Rating</span>
-            </div>
+            <div className="flex-1 flex flex-col gap-5">
+              <h1 className="text-4xl font-bold text-gray-800 leading-tight">{anime.title}</h1>
+              
+              <div className="flex items-center gap-4 text-base text-gray-600">
+                <span>{anime.episodes} Episodes</span>
+                <span className="text-gray-400">•</span>
+                <span>{anime.meanScore}% Rating</span>
+              </div>
 
-            <div className="flex flex-wrap gap-2.5 justify-center md:justify-start">
-              {anime.genres.slice(0, 4).map((genre, index) => (
-                <span 
-                  key={index} 
-                  className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm transition-colors duration-200 hover:bg-blue-500"
-                >
-                  {genre}
-                </span>
-              ))}
+              {/* Show all genres rather than slicing */}
+              <div className="flex flex-wrap gap-2.5">
+                {anime.genres.map((genre, index) => (
+                  <span 
+                    key={index} 
+                    className="bg-[#4D55CC] text-white px-4 py-1.5 rounded-full text-sm transition-colors duration-200 hover:bg-[#7A73D1] mb-1"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+              
+              <p className="text-gray-700 leading-relaxed text-base">
+                {showFullDescription ? anime.description : truncateDescription(anime.description)}
+                {anime.description.split(' ').length > 50 && (
+                  <button 
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="bg-transparent border-none text-[#4D55CC] cursor-pointer text-base p-0 underline ml-1 hover:text-[#7A73D1]"
+                  >
+                    {showFullDescription ? ' Show Less' : ' Read More'}
+                  </button>
+                )}
+              </p>
             </div>
-
-            <p className="text-gray-700 leading-relaxed text-base text-left">
-              {showFullDescription ? anime.description : truncateDescription(anime.description)}
-              {anime.description.split(' ').length > 50 && (
-                <button 
-                  onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="bg-transparent border-none text-blue-600 cursor-pointer text-base p-0 underline ml-1 hover:text-blue-500"
-                >
-                  {showFullDescription ? ' Show Less' : ' Read More'}
-                </button>
-              )}
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-5 shadow-lg flex justify-center z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 md:p-5 shadow-[0px_-4px_6px_rgba(0,0,0,0.1)] flex justify-center z-10">
         <button
           onClick={fetchRandomAnime}
           disabled={loading}
-          className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white border-none rounded-xl cursor-pointer text-base font-medium transition-all duration-200 hover:bg-blue-500 hover:translate-y-[-2px] disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[#4D55CC] text-white border-none rounded-xl cursor-pointer text-base font-medium transition-all duration-200 hover:bg-[#7A73D1] hover:translate-y-[-2px] disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           <RefreshCw className="w-5 h-5" />
           Get Random Anime

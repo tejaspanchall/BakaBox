@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import Header from '@/components/header/Header';
 
 const TimeUnit = ({ value, label }) => {
@@ -16,13 +17,40 @@ const TimeUnit = ({ value, label }) => {
   );
 };
 
+// Fun roast messages based on watch time
+const getRoastMessage = (timeData) => {
+  const totalMinutes = 
+    timeData.years * 525600 + 
+    timeData.months * 43800 + 
+    timeData.days * 1440 + 
+    timeData.hours * 60 + 
+    timeData.minutes;
+  
+  if (totalMinutes > 525600) { // More than a year
+    return `You've spent ${timeData.years} years watching anime. You could have learned ${Math.floor(timeData.years * 2)} new languages!`;
+  } else if (totalMinutes > 262800) { // More than 6 months
+    return `You're only ${6 - (totalMinutes / 43800)} months away from a full PhD in Anime Studies.`;
+  } else if (totalMinutes > 87600) { // More than 2 months
+    return `In the time you spent watching anime, you could have read ${Math.floor(totalMinutes / 300)} books!`;
+  } else if (totalMinutes > 43800) { // More than 1 month
+    return `You've spent a month of your life on anime. That's a whole vacation's worth!`;
+  } else {
+    return `${totalMinutes / 1440} days watching anime? Rookie numbers, you need to pump those up!`;
+  }
+};
+
 const LifeOnAnime = () => {
   const [username, setUsername] = useState('');
+  const [compareUsername, setCompareUsername] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [timeData, setTimeData] = useState(null);
+  const [compareTimeData, setCompareTimeData] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countingStats, setCountingStats] = useState(null);
+  const [animeData, setAnimeData] = useState(null);
+  const [viewMode, setViewMode] = useState('time'); // 'time', 'genres', 'studios', 'top5', 'patterns'
+  const [isComparing, setIsComparing] = useState(false);
 
   const animateNumber = (start, end, duration, setValue) => {
     const startTime = performance.now();
@@ -37,16 +65,38 @@ const LifeOnAnime = () => {
   };
 
   const fetchData = async (username) => {
-    const query = `
+    // First query to get basic watch time data
+    const timeQuery = `
       query ($username: String) {
         MediaListCollection(userName: $username, type: ANIME) {
           lists {
             entries {
               media {
+                id
+                title {
+                  romaji
+                  english
+                }
                 episodes
                 duration
+                genres
+                seasonYear
+                studios {
+                  nodes {
+                    name
+                  }
+                }
               }
               progress
+              completedAt {
+                year
+                month
+              }
+              startedAt {
+                year
+                month
+              }
+              status
             }
           }
         }
@@ -56,12 +106,119 @@ const LifeOnAnime = () => {
     const response = await fetch('https://graphql.anilist.co', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables: { username } })
+      body: JSON.stringify({ query: timeQuery, variables: { username } })
     });
 
     const data = await response.json();
     if (data.errors) throw new Error(data.errors[0].message);
     return data;
+  };
+
+  const processAnimeData = (responseData) => {
+    if (!responseData.data?.MediaListCollection?.lists) return null;
+
+    let totalMinutes = 0;
+    let genreCounts = {};
+    let studioCounts = {};
+    let animeList = [];
+    let watchByYear = {};
+    let watchByMonth = {};
+    let completedCount = 0;
+    
+    responseData.data.MediaListCollection.lists.forEach(list => {
+      list.entries.forEach(entry => {
+        const episodes = entry.progress || 0;
+        const duration = entry.media?.duration || 24;
+        const watchMinutes = episodes * duration;
+        
+        totalMinutes += watchMinutes;
+        
+        // Process genres
+        entry.media?.genres?.forEach(genre => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + watchMinutes;
+        });
+        
+        // Process studios
+        entry.media?.studios?.nodes?.forEach(studio => {
+          studioCounts[studio.name] = (studioCounts[studio.name] || 0) + watchMinutes;
+        });
+        
+        // For top 5 longest watched
+        animeList.push({
+          id: entry.media.id,
+          title: entry.media.title.english || entry.media.title.romaji,
+          watchTime: watchMinutes,
+          episodes: episodes,
+          status: entry.status
+        });
+        
+        // For watch patterns
+        const year = entry.completedAt?.year || entry.startedAt?.year;
+        if (year) {
+          watchByYear[year] = (watchByYear[year] || 0) + watchMinutes;
+        }
+        
+        const month = entry.completedAt?.month || entry.startedAt?.month;
+        if (year && month) {
+          const key = `${year}-${month}`;
+          watchByMonth[key] = (watchByMonth[key] || 0) + watchMinutes;
+        }
+        
+        // Count completed anime
+        if (entry.status === "COMPLETED") {
+          completedCount++;
+        }
+      });
+    });
+
+    // Transform data for visualization
+    const genreData = Object.entries(genreCounts)
+      .map(([name, minutes]) => ({ name, minutes }))
+      .sort((a, b) => b.minutes - a.minutes)
+      .slice(0, 5);
+    
+    const studioData = Object.entries(studioCounts)
+      .map(([name, minutes]) => ({ name, minutes }))
+      .sort((a, b) => b.minutes - a.minutes)
+      .slice(0, 5);
+    
+    const top5Anime = animeList
+      .sort((a, b) => b.watchTime - a.watchTime)
+      .slice(0, 5);
+    
+    const yearData = Object.entries(watchByYear)
+      .map(([year, minutes]) => ({ year: parseInt(year), minutes }))
+      .sort((a, b) => a.year - b.year);
+    
+    const mostWatchedYear = yearData.length > 0 
+      ? yearData.reduce((max, current) => (current.minutes > max.minutes ? current : max)).year
+      : null;
+    
+    const monthlyData = Object.entries(watchByMonth)
+      .map(([key, minutes]) => {
+        const [year, month] = key.split('-').map(Number);
+        return { year, month, minutes };
+      })
+      .sort((a, b) => a.year === b.year ? a.month - b.month : a.year - b.year)
+      .slice(-12); // Last 12 months with data
+    
+    // Calculate time units
+    const years = Math.floor(totalMinutes / (525600));
+    const months = Math.floor((totalMinutes % 525600) / 43800);
+    const days = Math.floor((totalMinutes % 43800) / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    return {
+      timeData: { years, months, days, hours, minutes },
+      genres: genreData,
+      studios: studioData,
+      top5: top5Anime,
+      yearPattern: yearData,
+      monthPattern: monthlyData,
+      mostWatchedYear,
+      completedCount
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -75,42 +232,34 @@ const LifeOnAnime = () => {
     setError('');
     setTimeData(null);
     setCountingStats(null);
+    setAnimeData(null);
+    setCompareTimeData(null);
+    setIsComparing(false);
 
     try {
       const response = await fetchData(username);
-      if (!response.data?.MediaListCollection?.lists) throw new Error('No data found');
-
-      let totalMinutes = 0;
-      response.data.MediaListCollection.lists.forEach(list => {
-        list.entries.forEach(entry => {
-          const episodes = entry.progress || 0;
-          const duration = entry.media?.duration || 24;
-          totalMinutes += episodes * duration;
-        });
-      });
-
-      const years = Math.floor(totalMinutes / (525600));
-      const months = Math.floor((totalMinutes % 525600) / 43800);
-      const days = Math.floor((totalMinutes % 43800) / 1440);
-      const hours = Math.floor((totalMinutes % 1440) / 60);
-      const minutes = totalMinutes % 60;
-
-      setTimeData({ years, months, days, hours, minutes });
+      const processedData = processAnimeData(response);
+      
+      if (!processedData) throw new Error('No data found');
+      
+      setTimeData(processedData.timeData);
+      setAnimeData(processedData);
       setCountingStats({ years: 0, months: 0, days: 0, hours: 0, minutes: 0 });
 
-      animateNumber(0, years, 2000, (value) => 
+      // Animate counters
+      animateNumber(0, processedData.timeData.years, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, years: value }))
       );
-      animateNumber(0, months, 2000, (value) => 
+      animateNumber(0, processedData.timeData.months, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, months: value }))
       );
-      animateNumber(0, days, 2000, (value) => 
+      animateNumber(0, processedData.timeData.days, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, days: value }))
       );
-      animateNumber(0, hours, 2000, (value) => 
+      animateNumber(0, processedData.timeData.hours, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, hours: value }))
       );
-      animateNumber(0, minutes, 2000, (value) => 
+      animateNumber(0, processedData.timeData.minutes, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, minutes: value }))
       );
 
@@ -122,12 +271,48 @@ const LifeOnAnime = () => {
     }
   };
 
+  const handleCompare = async () => {
+    if (!compareUsername.trim()) {
+      setError('Please enter a username to compare with');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetchData(compareUsername);
+      const processedData = processAnimeData(response);
+      
+      if (!processedData) throw new Error('No data found for comparison user');
+      
+      setCompareTimeData(processedData.timeData);
+      setIsComparing(true);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleReset = () => {
     setUsername('');
+    setCompareUsername('');
     setSubmitted(false);
     setTimeData(null);
     setCountingStats(null);
+    setAnimeData(null);
+    setCompareTimeData(null);
+    setIsComparing(false);
     setError('');
+    setViewMode('time');
+  };
+
+  // Helper to format minutes for display
+  const formatMinutes = (minutes) => {
+    if (minutes < 60) return `${minutes} mins`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} hrs ${minutes % 60} mins`;
+    return `${Math.floor(minutes / 1440)} days ${Math.floor((minutes % 1440) / 60)} hrs`;
   };
 
   return (
@@ -170,31 +355,295 @@ const LifeOnAnime = () => {
           </div>
         ) : (
           <div className="max-w-6xl mx-auto px-4 text-center">
-            <h2 className="text-[1.25rem] sm:text-[1.5rem] mb-8 leading-relaxed">
-              👋 Hey <span className="font-bold text-[#3b82f6]">{username}</span>, <br/>
-              Congrats! You wasted this much of your time on anime instead of a new skill xD
+            <h2 className="text-[1.25rem] sm:text-[1.5rem] mb-4 leading-relaxed">
+              👋 Hey <span className="font-bold text-[#3b82f6]">{username}</span>
             </h2>
-            <div className="flex flex-wrap justify-center gap-4 p-4 sm:p-8 mx-auto max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:py-4 max-sm:px-0 max-sm:gap-1 max-sm:w-full max-sm:scrollbar-hide">
-              {countingStats && (
-                <>
-                  <TimeUnit value={countingStats.years} label="YEARS" />
-                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
-                  <TimeUnit value={countingStats.months} label="MONTHS" />
-                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
-                  <TimeUnit value={countingStats.days} label="DAYS" />
-                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
-                  <TimeUnit value={countingStats.hours} label="HOURS" />
-                  <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
-                  <TimeUnit value={countingStats.minutes} label="MINS" />
-                </>
+            
+            {/* Navigation */}
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              <button 
+                onClick={() => setViewMode('time')}
+                className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'time' ? 'bg-[#3b82f6] text-white' : 'bg-[#e5e7eb] text-[#1f2937]'}`}
+              >
+                ⏱️ Time
+              </button>
+              <button 
+                onClick={() => setViewMode('genres')}
+                className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'genres' ? 'bg-[#3b82f6] text-white' : 'bg-[#e5e7eb] text-[#1f2937]'}`}
+              >
+                🏷️ Genres
+              </button>
+              <button 
+                onClick={() => setViewMode('studios')}
+                className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'studios' ? 'bg-[#3b82f6] text-white' : 'bg-[#e5e7eb] text-[#1f2937]'}`}
+              >
+                🎬 Studios
+              </button>
+              <button 
+                onClick={() => setViewMode('top5')}
+                className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'top5' ? 'bg-[#3b82f6] text-white' : 'bg-[#e5e7eb] text-[#1f2937]'}`}
+              >
+                🏆 Top 5
+              </button>
+              <button 
+                onClick={() => setViewMode('patterns')}
+                className={`px-4 py-2 rounded-lg transition-colors ${viewMode === 'patterns' ? 'bg-[#3b82f6] text-white' : 'bg-[#e5e7eb] text-[#1f2937]'}`}
+              >
+                📊 Patterns
+              </button>
+            </div>
+            
+            {/* Content based on view mode */}
+            {viewMode === 'time' && (
+              <div>
+                <p className="text-[1.125rem] mb-4 text-[#4b5563] font-medium">
+                  {animeData?.completedCount ? `You've completed ${animeData.completedCount} anime series.` : ''}
+                  {animeData?.mostWatchedYear ? ` Your peak anime year was ${animeData.mostWatchedYear}.` : ''}
+                </p>
+                
+                <div className="bg-[#f3f4f6] rounded-lg p-4 mb-6">
+                  <h3 className="text-[1.125rem] font-bold text-[#ef4444]">😂 Reality Check:</h3>
+                  <p className="text-[1rem] text-[#1f2937]">
+                    {timeData && getRoastMessage(timeData)}
+                  </p>
+                </div>
+                
+                <div className="flex flex-wrap justify-center gap-4 p-4 sm:p-8 mx-auto max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:py-4 max-sm:px-0 max-sm:gap-1 max-sm:w-full max-sm:scrollbar-hide">
+                  {countingStats && (
+                    <>
+                      <TimeUnit value={countingStats.years} label="YEARS" />
+                      <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                      <TimeUnit value={countingStats.months} label="MONTHS" />
+                      <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                      <TimeUnit value={countingStats.days} label="DAYS" />
+                      <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                      <TimeUnit value={countingStats.hours} label="HOURS" />
+                      <div className="font-mono text-[2.5rem] sm:text-[4rem] text-[#1f2937] flex items-center px-1 sm:px-2 opacity-50 max-sm:text-[1.5rem] max-sm:px-0.5 max-sm:flex-shrink-0">:</div>
+                      <TimeUnit value={countingStats.minutes} label="MINS" />
+                    </>
+                  )}
+                </div>
+                
+                {/* Compare with friends section */}
+                {!isComparing ? (
+                  <div className="mt-8 p-4 border border-[#e5e7eb] rounded-lg max-w-md mx-auto">
+                    <h3 className="text-[1.125rem] font-bold mb-2">Compare with a Friend</h3>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Friend's username"
+                        value={compareUsername}
+                        onChange={(e) => setCompareUsername(e.target.value)}
+                        className="flex-1 p-2 border-2 border-[#e5e7eb] rounded-lg text-base outline-none focus:border-[#3b82f6]"
+                        disabled={isLoading}
+                      />
+                      <button 
+                        onClick={handleCompare} 
+                        className="px-4 py-2 bg-[#3b82f6] text-white border-none rounded-lg cursor-pointer transition-colors hover:bg-[#2563eb] disabled:opacity-50"
+                        disabled={isLoading || !compareUsername}
+                      >
+                        Compare
+                      </button>
+                    </div>
+                    {error && (
+                      <div className="mt-2 p-2 bg-[#fee2e2] text-[#dc2626] rounded-lg text-sm">
+                        {error}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-8 p-4 border border-[#e5e7eb] rounded-lg">
+                    <h3 className="text-[1.125rem] font-bold mb-4">Comparison with {compareUsername}</h3>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-3 bg-[#f3f4f6] rounded-lg">
+                        <h4 className="font-bold text-[#3b82f6]">{username}</h4>
+                        <p className="text-[1.125rem]">
+                          {timeData ? `${timeData.years}y ${timeData.months}m ${timeData.days}d` : ''}
+                        </p>
+                      </div>
+                      
+                      <div className="p-3 bg-[#f3f4f6] rounded-lg">
+                        <h4 className="font-bold text-[#ef4444]">{compareUsername}</h4>
+                        <p className="text-[1.125rem]">
+                          {compareTimeData ? `${compareTimeData.years}y ${compareTimeData.months}m ${compareTimeData.days}d` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {timeData && compareTimeData && (
+                      <div className="p-3 bg-[#f9fafb] rounded-lg">
+                        <h4 className="font-bold mb-2">Who's the bigger weeb?</h4>
+                        <p className="text-[1rem]">
+                          {(() => {
+                            const user1Minutes = timeData.years * 525600 + timeData.months * 43800 + timeData.days * 1440 + timeData.hours * 60 + timeData.minutes;
+                            const user2Minutes = compareTimeData.years * 525600 + compareTimeData.months * 43800 + compareTimeData.days * 1440 + compareTimeData.hours * 60 + compareTimeData.minutes;
+                            
+                            if (user1Minutes > user2Minutes) {
+                              const diff = user1Minutes - user2Minutes;
+                              return `${username} has watched ${formatMinutes(diff)} more anime than ${compareUsername}! 🏆`;
+                            } else if (user2Minutes > user1Minutes) {
+                              const diff = user2Minutes - user1Minutes;
+                              return `${compareUsername} has watched ${formatMinutes(diff)} more anime than you! 😮`;
+                            } else {
+                              return `Wow, you've both watched exactly the same amount of anime! 🤝`;
+                            }
+                          })()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {viewMode === 'genres' && animeData?.genres && (
+              <div>
+                <h3 className="text-[1.25rem] font-bold mb-4">Your Top Genres</h3>
+                <div className="mx-auto" style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={animeData.genres}>
+                      <XAxis dataKey="name" />
+                      <YAxis label={{ value: 'Minutes Watched', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => [`${formatMinutes(value)}`, 'Watch Time']} />
+                      <Bar dataKey="minutes" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 p-4 bg-[#f3f4f6] rounded-lg">
+                  <h4 className="font-bold text-[1rem] mb-2">Your Taste Analysis:</h4>
+                  <p className="text-[0.875rem] text-[#4b5563]">
+                    {animeData.genres[0] && `You're clearly a big fan of ${animeData.genres[0].name} anime, with ${formatMinutes(animeData.genres[0].minutes)} watched!`}
+                    {animeData.genres[1] && ` ${animeData.genres[1].name} comes in second place.`}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {viewMode === 'studios' && animeData?.studios && (
+              <div>
+                <h3 className="text-[1.25rem] font-bold mb-4">Your Favorite Studios</h3>
+                <div className="mx-auto" style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={animeData.studios}>
+                      <XAxis dataKey="name" />
+                      <YAxis label={{ value: 'Minutes Watched', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => [`${formatMinutes(value)}`, 'Watch Time']} />
+                      <Bar dataKey="minutes" fill="#10b981" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 p-4 bg-[#f3f4f6] rounded-lg">
+                  <h4 className="font-bold text-[1rem] mb-2">Studio Loyalty:</h4>
+                  <p className="text-[0.875rem] text-[#4b5563]">
+                    {animeData.studios[0] && `You've spent ${formatMinutes(animeData.studios[0].minutes)} with ${animeData.studios[0].name} productions!`}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {viewMode === 'top5' && animeData?.top5 && (
+              <div>
+                <h3 className="text-[1.25rem] font-bold mb-4">Your Top 5 Longest Watched Anime</h3>
+                <div className="space-y-3">
+                  {animeData.top5.map((anime, index) => (
+                    <div key={anime.id} className="p-3 bg-[#f9fafb] rounded-lg flex items-center">
+                      <div className="w-8 h-8 bg-[#3b82f6] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 text-left">
+                        <h4 className="font-medium">{anime.title}</h4>
+                        <div className="flex justify-between">
+                          <span className="text-[0.875rem] text-[#4b5563]">{anime.episodes} episodes</span>
+                          <span className="text-[0.875rem] font-medium">{formatMinutes(anime.watchTime)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {viewMode === 'patterns' && animeData?.yearPattern && (
+              <div>
+                <h3 className="text-[1.25rem] font-bold mb-4">Your Anime Watch Patterns</h3>
+                
+                <div className="mb-8">
+                  <h4 className="text-[1rem] font-medium mb-2">Yearly Watch Time</h4>
+                  <div className="mx-auto" style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                      <LineChart data={animeData.yearPattern}>
+                        <XAxis dataKey="year" />
+                        <YAxis label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} />
+                        <Tooltip formatter={(value) => [`${formatMinutes(value)}`, 'Watch Time']} />
+                        <Line type="monotone" dataKey="minutes" stroke="#8884d8" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                {animeData.monthPattern.length > 0 && (
+                  <div>
+                    <h4 className="text-[1rem] font-medium mb-2">Recent Monthly Trends</h4>
+                    <div className="mx-auto" style={{ width: '100%', height: 300 }}>
+                      <ResponsiveContainer>
+                        <BarChart data={animeData.monthPattern.map(item => ({
+                          label: `${item.year}-${item.month}`,
+                          minutes: item.minutes
+                        }))}>
+                          <XAxis dataKey="label" />
+                          <YAxis label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip formatter={(value) => [`${formatMinutes(value)}`, 'Watch Time']} />
+                          <Bar dataKey="minutes" fill="#f59e0b" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-4 p-4 bg-[#f3f4f6] rounded-lg">
+                  <h4 className="font-bold text-[1rem] mb-2">Watch Pattern Analysis:</h4>
+                  <p className="text-[0.875rem] text-[#4b5563]">
+                    {animeData.mostWatchedYear && `${animeData.mostWatchedYear} was your peak anime year.`}
+                    {animeData.yearPattern.length > 2 && 
+                      ` Your anime consumption has ${
+                        animeData.yearPattern[animeData.yearPattern.length-1].minutes > 
+                        animeData.yearPattern[animeData.yearPattern.length-2].minutes ? 
+                        'increased' : 'decreased'
+                      } recently.`
+                    }{animeData.yearPattern.length > 2 && 
+                      ` Your anime consumption has ${
+                        animeData.yearPattern[animeData.yearPattern.length-1].minutes > 
+                        animeData.yearPattern[animeData.yearPattern.length-2].minutes ? 
+                        'increased' : 'decreased'
+                      } recently.`
+                    }
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-8 flex justify-center gap-3">
+              <button
+                onClick={handleReset}
+                className="px-6 py-3 bg-[#3b82f6] text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-[#2563eb]"
+              >
+                🔄 Reset
+              </button>
+              {compareTimeData && (
+                <button
+                  onClick={() => {
+                    setCompareTimeData(null);
+                    setIsComparing(false);
+                    setCompareUsername('');
+                    setError('');
+                  }}
+                  className="px-6 py-3 bg-[#e5e7eb] text-[#1f2937] border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-[#d1d5db]"
+                >
+                  Cancel Comparison
+                </button>
               )}
             </div>
-            <button
-              onClick={handleReset}
-              className="mt-8 px-6 py-3 bg-[#3b82f6] text-white border-none rounded-lg text-base cursor-pointer transition-colors hover:bg-[#2563eb]"
-            >
-              🔄 Reset
-            </button>
           </div>
         )}
       </div>

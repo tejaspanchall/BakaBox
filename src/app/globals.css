@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: 'Chivo';
-  src: url('/public/assets/fonts/chivo.regular.ttf') format('truetype');
+  src: url('/fonts/chivo.regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

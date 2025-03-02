@@ -215,7 +215,7 @@ const Calendar = () => {
     return (
       <div className="relative pt-3">
         {isNext && (
-          <div className="absolute top-0 right-[-5px] bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium z-10">
+          <div className="absolute top-0 right-[-5px] bg-[#4D55CC] text-white px-2 py-1 rounded text-xs font-medium z-10">
             Airing Next
           </div>
         )}

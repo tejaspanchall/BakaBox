@@ -50,7 +50,7 @@ const Home = () => {
         </div>
       )}
       <div className="p-4 bg-white h-full overflow-y-auto text-black">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1" style={{ gridAutoRows: '185px' }}>
+        <div className="max-w-[1350px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1" style={{ gridAutoRows: '185px' }}>
           {cards.map((card, index) => (
             <div
               key={index}
