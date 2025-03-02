@@ -17,7 +17,6 @@ const TimeUnit = ({ value, label }) => {
   );
 };
 
-// Fun roast messages based on watch time
 const getRoastMessage = (timeData) => {
   const totalMinutes = 
     timeData.years * 525600 + 
@@ -26,13 +25,13 @@ const getRoastMessage = (timeData) => {
     timeData.hours * 60 + 
     timeData.minutes;
   
-  if (totalMinutes > 525600) { // More than a year
+  if (totalMinutes > 525600) {
     return `You've spent ${timeData.years} years watching anime. You could have learned ${Math.floor(timeData.years * 2)} new languages!`;
-  } else if (totalMinutes > 262800) { // More than 6 months
+  } else if (totalMinutes > 262800) {
     return `You're only ${6 - (totalMinutes / 43800)} months away from a full PhD in Anime Studies.`;
-  } else if (totalMinutes > 87600) { // More than 2 months
+  } else if (totalMinutes > 87600) {
     return `In the time you spent watching anime, you could have read ${Math.floor(totalMinutes / 300)} books!`;
-  } else if (totalMinutes > 43800) { // More than 1 month
+  } else if (totalMinutes > 43800) {
     return `You've spent a month of your life on anime. That's a whole vacation's worth!`;
   } else {
     return `${totalMinutes / 1440} days watching anime? Rookie numbers, you need to pump those up!`;
@@ -49,7 +48,7 @@ const LifeOnAnime = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [countingStats, setCountingStats] = useState(null);
   const [animeData, setAnimeData] = useState(null);
-  const [viewMode, setViewMode] = useState('time'); // 'time', 'genres', 'studios', 'top5', 'patterns'
+  const [viewMode, setViewMode] = useState('time');
   const [isComparing, setIsComparing] = useState(false);
 
   const animateNumber = (start, end, duration, setValue) => {
@@ -65,7 +64,6 @@ const LifeOnAnime = () => {
   };
 
   const fetchData = async (username) => {
-    // First query to get basic watch time data
     const timeQuery = `
       query ($username: String) {
         MediaListCollection(userName: $username, type: ANIME) {
@@ -133,17 +131,14 @@ const LifeOnAnime = () => {
         
         totalMinutes += watchMinutes;
         
-        // Process genres
         entry.media?.genres?.forEach(genre => {
           genreCounts[genre] = (genreCounts[genre] || 0) + watchMinutes;
         });
         
-        // Process studios
         entry.media?.studios?.nodes?.forEach(studio => {
           studioCounts[studio.name] = (studioCounts[studio.name] || 0) + watchMinutes;
         });
         
-        // For top 5 longest watched
         animeList.push({
           id: entry.media.id,
           title: entry.media.title.english || entry.media.title.romaji,
@@ -152,7 +147,6 @@ const LifeOnAnime = () => {
           status: entry.status
         });
         
-        // For watch patterns
         const year = entry.completedAt?.year || entry.startedAt?.year;
         if (year) {
           watchByYear[year] = (watchByYear[year] || 0) + watchMinutes;
@@ -164,14 +158,12 @@ const LifeOnAnime = () => {
           watchByMonth[key] = (watchByMonth[key] || 0) + watchMinutes;
         }
         
-        // Count completed anime
         if (entry.status === "COMPLETED") {
           completedCount++;
         }
       });
     });
 
-    // Transform data for visualization
     const genreData = Object.entries(genreCounts)
       .map(([name, minutes]) => ({ name, minutes }))
       .sort((a, b) => b.minutes - a.minutes)
@@ -200,9 +192,8 @@ const LifeOnAnime = () => {
         return { year, month, minutes };
       })
       .sort((a, b) => a.year === b.year ? a.month - b.month : a.year - b.year)
-      .slice(-12); // Last 12 months with data
+      .slice(-12);
     
-    // Calculate time units
     const years = Math.floor(totalMinutes / (525600));
     const months = Math.floor((totalMinutes % 525600) / 43800);
     const days = Math.floor((totalMinutes % 43800) / 1440);
@@ -308,7 +299,6 @@ const LifeOnAnime = () => {
     setViewMode('time');
   };
 
-  // Helper to format minutes for display
   const formatMinutes = (minutes) => {
     if (minutes < 60) return `${minutes} mins`;
     if (minutes < 1440) return `${Math.floor(minutes / 60)} hrs ${minutes % 60} mins`;
@@ -359,7 +349,6 @@ const LifeOnAnime = () => {
               👋 Hey <span className="font-bold text-[#3b82f6]">{username}</span>
             </h2>
             
-            {/* Navigation */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               <button 
                 onClick={() => setViewMode('time')}
@@ -393,7 +382,6 @@ const LifeOnAnime = () => {
               </button>
             </div>
             
-            {/* Content based on view mode */}
             {viewMode === 'time' && (
               <div>
                 <p className="text-[1.125rem] mb-4 text-[#4b5563] font-medium">
@@ -424,7 +412,6 @@ const LifeOnAnime = () => {
                   )}
                 </div>
                 
-                {/* Compare with friends section */}
                 {!isComparing ? (
                   <div className="mt-8 p-4 border border-[#e5e7eb] rounded-lg max-w-md mx-auto">
                     <h3 className="text-[1.125rem] font-bold mb-2">Compare with a Friend</h3>

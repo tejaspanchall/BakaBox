@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -8,14 +9,23 @@ import Header from '@/components/header/Header';
 const Home = () => {
   const router = useRouter();
   const [quote, setQuote] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchQuote = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`https://yurippe.vercel.app/api/quotes?timestamp=${new Date().getTime()}`);
+        const cacheParam = `?cache=${new Date().toDateString()}`;
+        
+        const response = await fetch(`https://yurippe.vercel.app/api/quotes${cacheParam}`, {
+          cache: 'force-cache',
+          next: { revalidate: 86400 }
+        });
+        
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
+        
         const quotes = await response.json();
         const shortQuotes = quotes.filter(q => q.quote.split(' ').length <= 35);
 
@@ -25,10 +35,13 @@ const Home = () => {
         }
       } catch (error) {
         console.error('Error fetching quote:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchQuote();
+    
   }, []);
 
   // 1000px x 377px
@@ -43,12 +56,18 @@ const Home = () => {
   return (
     <div>
       <Header />
-      {quote && (
-        <div className="text-center p-4 bg-white rounded-lg">
-          <p className="text-lg italic text-gray-800">&ldquo;{quote.quote}&rdquo;</p>
-          <p className="text-sm text-gray-600 mt-2">- {quote.character} ({quote.show})</p>
-        </div>
-      )}
+      <div className="text-center p-4 bg-white rounded-lg">
+        {loading ? (
+          <p className="text-lg text-gray-500">Loading quote...</p>
+        ) : quote ? (
+          <>
+            <p className="text-lg italic text-gray-800">&ldquo;{quote.quote}&rdquo;</p>
+            <p className="text-sm text-gray-600 mt-2">- {quote.character} ({quote.show})</p>
+          </>
+        ) : (
+          <p className="text-lg text-gray-500">Quote not available</p>
+        )}
+      </div>
       <div className="p-4 bg-white h-full overflow-y-auto text-black">
         <div className="max-w-[1350px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1" style={{ gridAutoRows: '185px' }}>
           {cards.map((card, index) => (

@@ -11,7 +11,7 @@ const chivo = Chivo({
 
 export const metadata = {
   title: 'BakaBox',
-  description: 'Your one-stop destination for anime information',
+  description: 'Your one-stop destination for anime utilities',
 };
 
 export default function RootLayout({ children }) {

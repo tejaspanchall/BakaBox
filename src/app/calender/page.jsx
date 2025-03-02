@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Clock, AlertTriangle } from 'lucide-react';
 import Header from '@/components/header/Header';
 
 const Calendar = () => {
@@ -9,10 +10,12 @@ const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   const fetchAnimeData = async (retry = 0) => {
+    setIsRefreshing(true);
     const query = `
       query ($season: MediaSeason, $year: Int) {
         Page(page: 1, perPage: 50) {
@@ -24,6 +27,7 @@ const Calendar = () => {
             }
             coverImage {
               large
+              extraLarge
             }
             nextAiringEpisode {
               airingAt
@@ -89,6 +93,8 @@ const Calendar = () => {
     } catch (err) {
       console.error('Fetch error:', err);
       handleError(err, retry);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
@@ -133,7 +139,7 @@ const Calendar = () => {
 
     const refreshInterval = setInterval(() => {
       fetchAnimeData();
-    }, 900000); // 15 minutes
+    }, 900000);
 
     return () => clearInterval(refreshInterval);
   }, []);
@@ -156,6 +162,22 @@ const Calendar = () => {
       .filter(a => a.nextAiringEpisode)
       .map(a => a.nextAiringEpisode.timeUntilAiring);
     return anime.nextAiringEpisode.timeUntilAiring === Math.min(...nextAiringTimes);
+  };
+
+  const formatTimeUntilAiring = (seconds) => {
+    if (!seconds) return null;
+    
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (days > 0) {
+      return `${days}d ${hours}h`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
   };
 
   const getDayOfWeek = (timestamp) => {
@@ -193,11 +215,13 @@ const Calendar = () => {
         ...anime,
         airingTime: anime.nextAiringEpisode?.airingAt
           ? formatTime(anime.nextAiringEpisode.airingAt)
-          : 'TBA'
+          : 'TBA',
+        timeUntil: anime.nextAiringEpisode?.timeUntilAiring
+          ? formatTimeUntilAiring(anime.nextAiringEpisode.timeUntilAiring)
+          : null
       });
     });
 
-    // Sort anime within each day by airing time
     Object.keys(days).forEach(day => {
       days[day].sort((a, b) => {
         if (a.airingTime === 'TBA') return 1;
@@ -209,34 +233,53 @@ const Calendar = () => {
     return days;
   };
 
-  const AnimeCard = ({ anime }) => {
+  const AnimeListItem = ({ anime }) => {
     const isNext = isAiringNext(anime);
+    const getCurrentDayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const isToday = getDayOfWeek(anime.nextAiringEpisode?.airingAt) === getCurrentDayName;
     
     return (
-      <div className="relative pt-3">
-        {isNext && (
-          <div className="absolute top-0 right-[-5px] bg-[#4D55CC] text-white px-2 py-1 rounded text-xs font-medium z-10">
-            Airing Next
-          </div>
-        )}
-        <div className="bg-gray-200 rounded-lg overflow-hidden shadow flex items-center p-3 h-20 transition-transform duration-200 ease-in-out hover:translate-y-[-2px] hover:shadow-md">
-          <div className="flex-shrink-0 mr-4 relative w-[45px] h-[60px]">
+      <div className={`relative transition-all duration-300 ${isRefreshing ? 'opacity-70' : 'opacity-100'}`}>
+        <div className="flex items-center py-3 border-b border-gray-100 hover:bg-gray-50">
+          <div className="relative h-16 w-16 md:h-20 md:w-20 flex-shrink-0 bg-gray-200 rounded-md overflow-hidden mr-4">
             <Image
-              src={anime.coverImage.large}
+              src={anime.coverImage.extraLarge || anime.coverImage.large}
               alt={anime.title.english || anime.title.romaji}
-              width={45}
-              height={60}
-              className="w-full h-full object-cover rounded"
+              fill
+              className="object-cover"
+              quality={80}
             />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="m-0 text-base text-gray-800 font-semibold mb-1 truncate">
-              {anime.title.english || anime.title.romaji}
-            </h3>
-            <p className="m-0 text-sm text-gray-600">
-              Ep {anime.nextAiringEpisode?.episode || '??'} 
-              {anime.airingTime !== 'TBA' ? ` airing at ${anime.airingTime}` : ' (TBA)'}
-            </p>
+          
+          <div className="flex-grow min-w-0">
+            <div className="flex items-center">
+              <h3 className="text-sm md:text-base font-medium text-gray-800 truncate mr-2">
+                {anime.title.english || anime.title.romaji}
+              </h3>
+              {isNext && (
+                <span className="bg-[#4D55CC] text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                  NEXT
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center text-xs md:text-sm text-gray-500 mt-1">
+              <div className="flex items-center mr-4">
+                <div className={`w-1.5 h-1.5 rounded-full mr-1 ${isToday ? 'bg-green-500' : 'bg-[#4D55CC]'}`}></div>
+                <span>Ep {anime.nextAiringEpisode?.episode || '??'}</span>
+              </div>
+              
+              <div className="mr-4">
+                {anime.airingTime !== 'TBA' ? anime.airingTime : 'Time TBA'}
+              </div>
+              
+              {anime.timeUntil && (
+                <div className="flex items-center">
+                  <Clock className="w-3 h-3 md:w-4 md:h-4 mr-1 text-gray-400" />
+                  <span>{anime.timeUntil}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -245,8 +288,9 @@ const Calendar = () => {
 
   if (loading && !animeData.length) {
     return (
-      <div className="flex justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
-        <img src="/loading.gif" alt="Loading..." className="w-35 h-35 object-contain" />
+      <div className="flex flex-col justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
+        <img src="/loading.gif" alt="Loading..." className="w-40 h-40 object-contain mb-4" />
+        <p className="text-gray-600 font-medium animate-pulse">Loading schedule...</p>
       </div>
     );
   } 
@@ -255,29 +299,47 @@ const Calendar = () => {
   const orderedDays = getOrderedDays();
 
   return (
-    <div>
+    <div className="font-['Chivo',_sans-serif] min-h-screen bg-white">
       <Header />
-      <div className="max-w-[1400px] mx-auto px-8">
+      
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
         {error && (
-          <div className="bg-yellow-50 text-yellow-800 p-3 mb-4 border border-yellow-200 rounded text-center">
-            {error}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 my-4 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+            <p className="text-yellow-800 text-sm">{error}</p>
           </div>
         )}
-        {orderedDays.map(day => {
-          const animeList = organizedAnime[day];
-          if (animeList.length === 0) return null;
-          
-          return (
-            <div key={day} className="mb-12">
-              <h2 className="text-2xl text-gray-700 mb-4 font-semibold">{day}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {animeList.map(anime => (
-                  <AnimeCard key={anime.id} anime={anime} />
-                ))}
+        
+        <div className="pt-2">
+          {orderedDays.map(day => {
+            const animeList = organizedAnime[day];
+            if (animeList.length === 0) return null;
+            
+            const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            const isCurrentDay = day === currentDay;
+            
+            return (
+              <div key={day} className="mb-8">
+                <div className="flex items-center gap-2 mb-3 sticky top-0 bg-white py-3 z-10 border-b border-gray-200">
+                  <h2 className={`text-lg md:text-xl font-bold ${isCurrentDay ? 'text-[#4D55CC]' : 'text-gray-700'}`}>
+                    {day}
+                  </h2>
+                  {isCurrentDay && (
+                    <span className="bg-[#4D55CC] text-white text-xs px-2 py-0.5 rounded-full">
+                      Today
+                    </span>
+                  )}
+                </div>
+                
+                <div className="divide-y divide-gray-50">
+                  {animeList.map(anime => (
+                    <AnimeListItem key={anime.id} anime={anime} />
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

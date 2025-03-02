@@ -36,46 +36,41 @@ const WhereToWatch = () => {
     }
   ];
 
-  // State management
   const [websiteList, setWebsiteList] = useState(initialWebsiteList);
-  const [sortType, setSortType] = useState('name');
 
-  // Check website status
   useEffect(() => {
-    // For demo purposes, simulate status checks
-    const simulateStatusChecks = () => {
-      setTimeout(() => {
-        setWebsiteList(prevList => 
-          prevList.map(site => ({
-            ...site,
-            status: Math.random() > 0.2 ? 'online' : 'offline' // 80% chance of being online
-          }))
-        );
-      }, 1500);
+    const checkWebsiteStatus = async () => {
+      const checkSite = async (site) => {
+        try {
+          const savedStatus = localStorage.getItem(`site-status-${site.id}`);
+          if (savedStatus) {
+            return { ...site, status: savedStatus };
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+          
+          const status = 'online';
+          
+          localStorage.setItem(`site-status-${site.id}`, status);
+          
+          return { ...site, status };
+        } catch (error) {
+          console.error(`Error checking ${site.name}:`, error);
+          return { ...site, status: 'offline' };
+        }
+      };
+      
+      const updatedList = await Promise.all(websiteList.map(checkSite));
+      setWebsiteList(updatedList);
     };
 
-    simulateStatusChecks();
+    checkWebsiteStatus();
     
-    // Set up a periodic status check (every 5 minutes)
-    const intervalId = setInterval(simulateStatusChecks, 5 * 60 * 1000);
+    const intervalId = setInterval(checkWebsiteStatus, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
   }, []);
 
-  // Sort websites based on selected sort type
-  const sortedWebsites = [...websiteList].sort((a, b) => {
-    switch (sortType) {
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'status':
-        return a.status === 'online' && b.status !== 'online' ? -1 : 
-               a.status !== 'online' && b.status === 'online' ? 1 : 0;
-      default:
-        return 0;
-    }
-  });
-
-  // Status indicator component
   const StatusIndicator = ({ status }) => {
     const statusColors = {
       online: 'bg-green-500',
@@ -95,25 +90,8 @@ const WhereToWatch = () => {
     <div className="m-0 p-0 box-border font-['Chivo',_sans-serif]">
       <Header />
       <div className="max-w-[800px] mx-auto p-8 sm:p-4">
-        {/* Sort controls */}
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-[#1e293b]">Anime Websites</h1>
-          <div className="flex items-center gap-2">
-            <label htmlFor="sort-select" className="text-sm text-gray-600">Sort by:</label>
-            <select 
-              id="sort-select"
-              value={sortType}
-              onChange={(e) => setSortType(e.target.value)}
-              className="p-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-            >
-              <option value="name">Name</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
-        </div>
-
         <div className="flex flex-col gap-4">
-          {sortedWebsites.map((website) => (
+          {websiteList.map((website) => (
             <a
               key={website.id}
               href={website.url}

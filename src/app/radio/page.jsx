@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayIcon, PauseIcon, Volume2, Music } from 'lucide-react';
 import Header from '@/components/header/Header';
