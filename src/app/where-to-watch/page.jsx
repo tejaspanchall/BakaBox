@@ -1,42 +1,119 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Header from '@/components/header/Header';
 
 const WhereToWatch = () => {
-  const websiteList = [
+  const initialWebsiteList = [
     {
       id: 1,
       name: 'Miruro',
       url: 'https://www.miruro.tv/',
-      logo: '/websites/miruro.jpeg'
+      logo: '/websites/miruro.jpeg',
+      status: 'checking'
     },
     {
       id: 2,
       name: 'HiAnime',
       url: 'https://hianime.to/',
-      logo: '/websites/hi.png'
+      logo: '/websites/hi.png',
+      status: 'checking'
     },
     {
       id: 3,
       name: 'AniTaku (Gogo Anime)',
       url: 'https://anitaku.io/',
-      logo: '/websites/gogo.png'
+      logo: '/websites/gogo.png',
+      status: 'checking'
     },
     {
       id: 4,
       name: 'AnimePahe',
       url: 'https://animepahe.ru/',
-      logo: '/websites/pahe.png'
+      logo: '/websites/pahe.png',
+      status: 'checking'
     }
   ];
+
+  // State management
+  const [websiteList, setWebsiteList] = useState(initialWebsiteList);
+  const [sortType, setSortType] = useState('name');
+
+  // Check website status
+  useEffect(() => {
+    // For demo purposes, simulate status checks
+    const simulateStatusChecks = () => {
+      setTimeout(() => {
+        setWebsiteList(prevList => 
+          prevList.map(site => ({
+            ...site,
+            status: Math.random() > 0.2 ? 'online' : 'offline' // 80% chance of being online
+          }))
+        );
+      }, 1500);
+    };
+
+    simulateStatusChecks();
+    
+    // Set up a periodic status check (every 5 minutes)
+    const intervalId = setInterval(simulateStatusChecks, 5 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Sort websites based on selected sort type
+  const sortedWebsites = [...websiteList].sort((a, b) => {
+    switch (sortType) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'status':
+        return a.status === 'online' && b.status !== 'online' ? -1 : 
+               a.status !== 'online' && b.status === 'online' ? 1 : 0;
+      default:
+        return 0;
+    }
+  });
+
+  // Status indicator component
+  const StatusIndicator = ({ status }) => {
+    const statusColors = {
+      online: 'bg-green-500',
+      offline: 'bg-red-500',
+      checking: 'bg-yellow-500'
+    };
+
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className={`inline-block w-2.5 h-2.5 rounded-full ${statusColors[status]} animate-pulse`}></span>
+        <span className="text-xs text-gray-600 capitalize">{status}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="m-0 p-0 box-border font-['Chivo',_sans-serif]">
       <Header />
       <div className="max-w-[800px] mx-auto p-8 sm:p-4">
+        {/* Sort controls */}
+        <div className="mb-6 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-[#1e293b]">Anime Websites</h1>
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-select" className="text-sm text-gray-600">Sort by:</label>
+            <select 
+              id="sort-select"
+              value={sortType}
+              onChange={(e) => setSortType(e.target.value)}
+              className="p-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <option value="name">Name</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-4">
-          {websiteList.map((website) => (
+          {sortedWebsites.map((website) => (
             <a
               key={website.id}
               href={website.url}
@@ -56,9 +133,13 @@ const WhereToWatch = () => {
               </div>
               
               <div className="flex-grow min-w-0 pr-4">
-                <h2 className="text-lg font-semibold text-[#1e293b] m-0 leading-[1.4] transition-colors duration-200 ease-linear group-hover:text-[#3b82f6]">
-                  {website.name}
-                </h2>
+                <div className="flex justify-between items-start">
+                  <h2 className="text-lg font-semibold text-[#1e293b] m-0 leading-[1.4] transition-colors duration-200 ease-linear group-hover:text-[#3b82f6]">
+                    {website.name}
+                  </h2>
+                  <StatusIndicator status={website.status} />
+                </div>
+                
                 <p className="text-sm text-[#64748b] mt-1 mb-0 overflow-hidden text-ellipsis whitespace-nowrap">
                   {website.url}
                 </p>
@@ -67,7 +148,7 @@ const WhereToWatch = () => {
           ))}
         </div>
       </div>
-      <div className="text-center mt-5 text-sm text-[#888]">
+      <div className="text-center mt-5 text-sm text-[#888] pb-6">
         <p>This list is for informational purposes only and is not intended as promotional content.</p>
       </div>
     </div>

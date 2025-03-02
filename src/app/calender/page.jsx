@@ -246,7 +246,7 @@ const Calendar = () => {
   if (loading && !animeData.length) {
     return (
       <div className="flex justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
-        <img src="/loading.gif" alt="Loading..." className="w-30 h-30 object-contain" />
+        <img src="/loading.gif" alt="Loading..." className="w-35 h-35 object-contain" />
       </div>
     );
   } 

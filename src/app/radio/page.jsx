@@ -1,7 +1,6 @@
-"use client";
-
-import { useState, useEffect, useRef } from 'react';
-import { PlayIcon, PauseIcon } from 'lucide-react';
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import { PlayIcon, PauseIcon, Volume2, Music } from 'lucide-react';
 import Header from '@/components/header/Header';
 
 const HEARTBEAT_INTERVAL = 45000;
@@ -9,6 +8,7 @@ const STREAM_URL = 'https://listen.moe/stream';
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.7);
   const [currentTrack, setCurrentTrack] = useState({
     title: 'Loading...',
     artist: 'Loading...',
@@ -69,6 +69,7 @@ const Radio = () => {
     if (!audio) return;
     audio.src = STREAM_URL;
     audio.preload = 'auto';
+    audio.volume = volume;
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleError = async () => {
@@ -90,6 +91,12 @@ const Radio = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
   const togglePlayPause = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -104,105 +111,113 @@ const Radio = () => {
     }
   };
 
-  const generateWavePath = () => {
-    const width = 1000;
-    const height = 100;
-    const segments = 20;
-    const points = [];
-    
-    for (let i = 0; i <= segments; i++) {
-      const x = (i / segments) * width;
-      const y = height / 2 + Math.sin(i * Math.PI / 2) * 20;
-      points.push(`${x},${y}`);
-    }
-    
-    return `M${points.join(' L')}`;
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
   };
 
   return (
-    <div className="m-0 p-0 box-border font-['Chivo',_sans-serif]">
+    <div>
       <Header />
-      <div className="w-full max-w-[400px] mx-auto my-8 px-4">
-        <div className="bg-[#2d3748] rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.2)] flex flex-col gap-4">
-          <div className="bg-[#1a202c] rounded-lg p-4 flex justify-between items-center">
-            <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#f56565]"></div>
-              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#ecc94b]"></div>
-              <div className="w-3 h-3 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.3)] bg-[#48bb78]"></div>
-            </div>
-            <div className="w-8 h-8 bg-[#1a202c] rounded flex items-center justify-center">
-              <div className="w-full h-full bg-[radial-gradient(#2d3748_20%,transparent_20%)] bg-[0_0] bg-[length:8px_8px]"></div>
-            </div>
+    <div className="m-0 p-0 box-border font-sans bg-white">
+      <div className="w-full max-w-md mx-auto my-12 px-4">
+        <div className="bg-white bg-opacity-90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+          <div className="absolute -right-16 -top-16 w-32 h-32 bg-purple-100 rounded-full opacity-60"></div>
+          <div className="absolute -left-16 -bottom-16 w-32 h-32 bg-indigo-100 rounded-full opacity-60"></div>
+          
+          <div className="absolute bottom-0 left-0 right-0 h-1 flex justify-center space-x-1 px-8 overflow-hidden">
+            {[...Array(30)].map((_, i) => (
+              <div 
+                key={i}
+                className={`w-1 bg-indigo-400 rounded-full transform transition-all duration-150 ${isPlaying ? 'animate-pulse' : 'opacity-30'}`}
+                style={{ 
+                  height: isPlaying ? `${Math.floor(20 + Math.random() * 30)}px` : '4px',
+                  animationDelay: `${i * 0.05}s`
+                }}
+              ></div>
+            ))}
           </div>
           
-          <div className="bg-[#2b4c7c] rounded-lg p-4">
-            <div className="bg-[#bcdaf7] p-4 rounded text-center">
-              <h2 className="text-[#1a365d] text-xl font-semibold mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="flex flex-col items-center pt-4 pb-8">
+            <div className="relative mb-8">
+              <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-600 shadow-lg flex items-center justify-center overflow-hidden">
+                <Music size={64} className="text-white opacity-40" />
+                
+                <div className={`absolute inset-0 flex items-center justify-center ${isPlaying ? 'animate-spin-slow' : ''}`} style={{animationDuration: '15s'}}>
+                  <div className="w-full h-full bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(255,255,255,0.3)_360deg)] opacity-30"></div>
+                </div>
+                
+                <div className="absolute w-10 h-10 rounded-full bg-white bg-opacity-20 border-4 border-white border-opacity-30"></div>
+              </div>
+              
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center">
+                <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              </div>
+            </div>
+            
+            <div className="text-center w-full mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 line-clamp-2">
                 {currentTrack.title}
               </h2>
-              <p className="text-[#2a4365] text-base whitespace-nowrap overflow-hidden text-ellipsis">
+              <p className="text-lg text-gray-600 line-clamp-1">
                 {currentTrack.artist}
               </p>
+              {isPlaying && currentTrack.listeners > 0 && (
+                <p className="mt-2 text-sm text-indigo-600 font-medium">
+                  {currentTrack.listeners.toLocaleString()} listening now
+                </p>
+              )}
+            </div>
+            
+            <div className="flex flex-col items-center w-full space-y-6">
+              <div className="w-full flex items-center space-x-4">
+                <Volume2 size={20} className={`text-gray-500 ${volume === 0 ? 'opacity-50' : ''}`} />
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                  aria-label="Volume"
+                />
+                <span className="text-xs font-medium text-gray-500 w-8 text-right">
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
+              
+              <button 
+                className="w-20 h-20 rounded-full bg-[#4D55CC] hover:bg-[#7A73D1] text-white shadow-lg flex items-center justify-center focus:outline-none hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                onClick={togglePlayPause}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? 
+                  <PauseIcon size={32} className="text-white" /> : 
+                  <PlayIcon size={32} className="text-white ml-1" />
+                }
+              </button>
+              
+              <div className="text-sm font-medium text-gray-500">
+                {isPlaying ? "LIVE STREAMING" : "READY TO PLAY"}
+              </div>
             </div>
           </div>
-
-          <div className="h-12 my-4 bg-[#1a202c] rounded-lg p-2 overflow-hidden relative">
-            <svg
-              className={`w-full h-full ${isPlaying ? 'animate-wave' : ''}`}
-              viewBox="0 0 1000 100"
-              preserveAspectRatio="none"
-            >
-              <path
-                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
-                d={generateWavePath()}
-                style={{
-                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none'
-                }}
-              />
-              <path
-                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
-                d={generateWavePath()}
-                style={{
-                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none',
-                  animationDelay: '-1.2s'
-                }}
-              />
-              <path
-                className="fill-none stroke-[#4299e1] stroke-[1px] stroke-round opacity-50"
-                d={generateWavePath()}
-                style={{
-                  animation: isPlaying ? 'waveFlow 3.6s linear infinite' : 'none',
-                  animationDelay: '-2.4s'
-                }}
-              />
-            </svg>
-            <style jsx>{`
-              @keyframes waveFlow {
-                0% {
-                  transform: translateX(0%);
-                  opacity: 0.5;
-                }
-                100% {
-                  transform: translateX(-50%);
-                  opacity: 0.2;
-                }
-              }
-            `}</style>
-          </div>
-
-          <div className="flex justify-center">
-            <button 
-              className="w-16 h-16 rounded-full border-none bg-[#4299e1] text-white cursor-pointer flex items-center justify-center transition-all duration-200 ease-linear shadow-[0_4px_6px_rgba(66,153,225,0.3)] hover:bg-[#3182ce] hover:scale-105 active:scale-95"
-              onClick={togglePlayPause}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? <PauseIcon size={32} /> : <PlayIcon size={32} />}
-            </button>
-          </div>
         </div>
-        <audio ref={audioRef} />
       </div>
+      <audio ref={audioRef} />
+      
+      <style jsx global>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 15s linear infinite;
+        }
+      `}</style>
     </div>
+  </div>
   );
 };
 
