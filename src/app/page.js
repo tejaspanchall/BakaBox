@@ -45,11 +45,11 @@ const Home = () => {
 
   // 1000px x 377px
   const cards = [
-    { image: "/home/Random.jpg", route: "/random-anime" },
-    { image: "/home/Calender.jpg", route: "/calender" },
-    { image: "/home/LifeOnAnime.jpg", route: "/life-on-anime" },
-    { image: "/home/Radio.jpg", route: "/radio" },
-    { image: "/home/Live.jpg", route: "/where-to-watch" }
+    { image: "/home/Random.webp", route: "/random-anime" },
+    { image: "/home/Calender.webp", route: "/calender" },
+    { image: "/home/LifeOnAnime.webp", route: "/life-on-anime" },
+    { image: "/home/Radio.webp", route: "/radio" },
+    { image: "/home/Live.webp", route: "/where-to-watch" }
   ];
 
   return (

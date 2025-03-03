@@ -287,7 +287,7 @@ const Calendar = () => {
 
   if (loading && !animeData.length) {
     return (
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center h-full py-40">
         <img src="/loading.gif" alt="Loading..." className="w-40 h-40 object-contain mb-4" />
       </div>
     );

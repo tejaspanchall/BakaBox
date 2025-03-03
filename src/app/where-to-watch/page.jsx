@@ -9,28 +9,28 @@ const WhereToWatch = () => {
       id: 1,
       name: 'Miruro',
       url: 'https://www.miruro.tv/',
-      logo: '/websites/miruro.jpeg',
+      logo: '/websites/miruro.webp',
       status: 'checking'
     },
     {
       id: 2,
       name: 'HiAnime',
       url: 'https://hianime.to/',
-      logo: '/websites/hi.png',
+      logo: '/websites/hi.webp',
       status: 'checking'
     },
     {
       id: 3,
       name: 'AniTaku (Gogo Anime)',
       url: 'https://anitaku.io/',
-      logo: '/websites/gogo.png',
+      logo: '/websites/gogo.webp',
       status: 'checking'
     },
     {
       id: 4,
       name: 'AnimePahe',
       url: 'https://animepahe.ru/',
-      logo: '/websites/pahe.png',
+      logo: '/websites/pahe.webp',
       status: 'checking'
     }
   ];
