@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import Header from '@/components/header/Header';
+import { NextSeo } from 'next-seo';
 
 const TimeUnit = ({ value, label }) => {
   return (
@@ -306,8 +306,12 @@ const LifeOnAnime = () => {
   };
 
   return (
+    <>
+    <NextSeo
+    title="Life on Anime - Otaku Lifestyle & Culture Hub"
+    description="Explore how anime influences lifestyles, fashion, and culture worldwide. Articles, galleries, and community stories celebrating the anime way of life."
+    />
     <div className="box-border m-0 p-0">
-      <Header />
       <div className="p-16 sm:p-4 sm:pt-8 max-sm:p-2 max-sm:pt-8">
         {!submitted ? (
           <div className="max-w-md mx-auto px-4">
@@ -635,6 +639,7 @@ const LifeOnAnime = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

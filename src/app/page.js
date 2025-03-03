@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Header from '@/components/header/Header';
 
 const Home = () => {
   const router = useRouter();
@@ -55,7 +54,6 @@ const Home = () => {
 
   return (
     <div>
-      <Header />
       <div className="text-center p-4 bg-white rounded-lg">
         {loading ? (
           <p className="text-lg text-gray-500">Loading quote...</p>

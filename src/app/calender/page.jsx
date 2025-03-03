@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Clock, AlertTriangle } from 'lucide-react';
-import Header from '@/components/header/Header';
+import { NextSeo } from 'next-seo';
 
 const Calendar = () => {
   const [animeData, setAnimeData] = useState([]);
@@ -288,9 +288,8 @@ const Calendar = () => {
 
   if (loading && !animeData.length) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
+      <div className="flex flex-col justify-center items-center">
         <img src="/loading.gif" alt="Loading..." className="w-40 h-40 object-contain mb-4" />
-        <p className="text-gray-600 font-medium animate-pulse">Loading schedule...</p>
       </div>
     );
   } 
@@ -299,9 +298,12 @@ const Calendar = () => {
   const orderedDays = getOrderedDays();
 
   return (
+    <>
+    <NextSeo
+    title="Anime Release Calendar - New Episodes & Premieres"
+    description="Keep track of upcoming anime episodes, season premieres, and movie releases with our interactive anime calendar. Never miss your favorite shows again."
+    />
     <div className="font-['Chivo',_sans-serif] min-h-screen bg-white">
-      <Header />
-      
       <div className="max-w-5xl mx-auto px-4 md:px-6">
         {error && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 my-4 flex items-center gap-2">
@@ -342,6 +344,7 @@ const Calendar = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

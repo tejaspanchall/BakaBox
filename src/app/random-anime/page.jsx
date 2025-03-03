@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Star, Play, Clock } from 'lucide-react';
 import Image from 'next/image';
-import Header from '@/components/header/Header';
 import { NextSeo } from 'next-seo';
  
 const RandomAnime = () => {
@@ -91,22 +90,23 @@ const RandomAnime = () => {
     fetchRandomAnime();
   }, []);
 
-  if (loading && !isRefreshing) {
+  if (loading || isRefreshing) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen font-['Chivo',_sans-serif]">
+      <div className="flex flex-col justify-center items-center">
         <img src="/loading.gif" alt="Loading..." className="w-40 h-40 object-contain mb-4" />
-        <p className="text-gray-600 font-medium animate-pulse">Finding your next anime...</p>
       </div>
     );
   }
 
   return (
     <>
-    <NextSeo title="Random Anime" description="Welcome to my website" />
+    <NextSeo
+    title="Random Anime Generator - Discover Your Next Watch"
+    description="Find new anime to watch with our random anime generator. Get personalized recommendations based on genre preferences, watch history, and community ratings."
+    />
     <div className="font-['Chivo',_sans-serif]">
-      <Header />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mb-20">
-        <div className={`bg-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+        <div className="bg-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300">
           <div className="md:hidden">
             <div className="relative w-full h-56 bg-gray-200">
               <Image
@@ -229,7 +229,7 @@ const RandomAnime = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0px_-4px_6px_rgba(0,0,0,0.1)] flex justify-center z-10">
         <button
           onClick={fetchRandomAnime}
-          disabled={loading}
+          disabled={loading || isRefreshing}
           className="flex items-center justify-center gap-2 w-full max-w-xs px-6 py-3 bg-[#4D55CC] text-white border-none rounded-xl cursor-pointer text-base font-medium transition-all duration-200 hover:bg-[#7A73D1] hover:translate-y-[-2px] disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
