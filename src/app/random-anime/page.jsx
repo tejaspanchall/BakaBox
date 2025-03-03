@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw, Star, Play, Clock } from 'lucide-react';
 import Image from 'next/image';
 import Header from '@/components/header/Header';
+import { NextSeo } from 'next-seo';
  
 const RandomAnime = () => {
   const [anime, setAnime] = useState({
@@ -100,6 +101,8 @@ const RandomAnime = () => {
   }
 
   return (
+    <>
+    <NextSeo title="Random Anime" description="Welcome to my website" />
     <div className="font-['Chivo',_sans-serif]">
       <Header />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mb-20">
@@ -234,6 +237,7 @@ const RandomAnime = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 
