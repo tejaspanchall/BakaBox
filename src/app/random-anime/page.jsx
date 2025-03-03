@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Star, Play, Clock } from 'lucide-react';
 import Image from 'next/image';
-import { NextSeo } from 'next-seo';
  
 const RandomAnime = () => {
   const [anime, setAnime] = useState({
@@ -99,11 +98,6 @@ const RandomAnime = () => {
   }
 
   return (
-    <>
-    <NextSeo
-    title="Random Anime Generator - Discover Your Next Watch"
-    description="Find new anime to watch with our random anime generator. Get personalized recommendations based on genre preferences, watch history, and community ratings."
-    />
     <div className="font-['Chivo',_sans-serif]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mb-20">
         <div className="bg-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300">
@@ -237,7 +231,6 @@ const RandomAnime = () => {
         </button>
       </div>
     </div>
-    </>
   );
 };
 

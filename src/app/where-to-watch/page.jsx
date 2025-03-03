@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { NextSeo } from 'next-seo';
 
 const WhereToWatch = () => {
   const initialWebsiteList = [
@@ -87,11 +86,6 @@ const WhereToWatch = () => {
   };
 
   return (
-    <>
-      <NextSeo
-        title="Where To Watch Anime - Site Status Tracker"
-        description="Check the status of popular anime streaming websites. See which sites are currently online or offline."
-      />
       <div className="m-0 p-0 box-border font-['Chivo',_sans-serif]">
         <div className="max-w-[800px] mx-auto p-8 sm:p-4">
           <div className="flex flex-col gap-4">
@@ -134,7 +128,6 @@ const WhereToWatch = () => {
           <p>This list is for informational purposes only and is not intended as promotional content.</p>
         </div>
       </div>
-    </>
   );
 };
 

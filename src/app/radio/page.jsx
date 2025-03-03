@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayIcon, PauseIcon, Volume2, Music } from 'lucide-react';
-import { NextSeo } from 'next-seo';
 
 const HEARTBEAT_INTERVAL = 45000;
 const STREAM_URL = 'https://listen.moe/stream';
@@ -118,11 +117,6 @@ const Radio = () => {
   };
 
   return (
-    <>
-    <NextSeo
-    title="Anime Radio - 24/7 Anime OSTs, Openings & Endings"
-    description="Listen to continuous streams of anime music, including opening themes, ending songs, original soundtracks, and J-pop hits from your favorite anime series."
-    />
     <div className="m-0 p-0 box-border font-sans bg-white">
       <div className="w-full max-w-md mx-auto my-12 px-4">
         <div className="bg-white bg-opacity-90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 relative overflow-hidden">
@@ -221,7 +215,6 @@ const Radio = () => {
         }
       `}</style>
     </div>
-    </>
   );
 };
 

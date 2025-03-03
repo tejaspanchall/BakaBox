@@ -2,15 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { NextSeo } from 'next-seo';
 
 const PrivacyPolicy = () => {
   return (
-    <>
-    <NextSeo
-    title="Privacy Policy - Anime Site User Data Protection"
-    description="Learn how we collect, use, and protect your personal information while using our anime services. Our commitment to your privacy and data security."
-    />
     <div className="font-['Chivo',_sans-serif]">
       <div className="max-w-4xl mx-auto px-5 py-10">
         <div className="bg-white p-8 rounded-2xl shadow-md">
@@ -118,7 +112,6 @@ const PrivacyPolicy = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };
 

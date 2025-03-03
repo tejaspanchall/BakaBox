@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Clock, AlertTriangle } from 'lucide-react';
-import { NextSeo } from 'next-seo';
 
 const Calendar = () => {
   const [animeData, setAnimeData] = useState([]);
@@ -298,11 +297,6 @@ const Calendar = () => {
   const orderedDays = getOrderedDays();
 
   return (
-    <>
-    <NextSeo
-    title="Anime Release Calendar - New Episodes & Premieres"
-    description="Keep track of upcoming anime episodes, season premieres, and movie releases with our interactive anime calendar. Never miss your favorite shows again."
-    />
     <div className="font-['Chivo',_sans-serif] min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-4 md:px-6">
         {error && (
@@ -344,7 +338,6 @@ const Calendar = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };
 
