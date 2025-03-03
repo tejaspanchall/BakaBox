@@ -49,7 +49,8 @@ const Home = () => {
     { image: "/home/Calender.webp", route: "/calender" },
     { image: "/home/LifeOnAnime.webp", route: "/life-on-anime" },
     { image: "/home/Radio.webp", route: "/radio" },
-    { image: "/home/Live.webp", route: "/where-to-watch" }
+    { image: "/home/Live.webp", route: "/where-to-watch" },
+    { image: "/home/Live.webp", route: "/trace" }
   ];
 
   return (
