@@ -11,6 +11,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [searchStartTime, setSearchStartTime] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -76,6 +77,10 @@ export default function Home() {
     setError(null);
     setResults(null);
     setSelectedMatch(null);
+    
+    // Record the start time when initiating the search
+    const startTime = Date.now();
+    setSearchStartTime(startTime);
 
     try {
       let response;
@@ -100,16 +105,145 @@ export default function Home() {
       }
 
       const data = await response.json();
+      
+      if (!data) {
+        throw new Error('No response data received from the server');
+      }
+
+      // Validate the response structure
+      if (!Array.isArray(data.result)) {
+        throw new Error('Invalid response format: result is not an array');
+      }
+
+      // Filter out invalid results and ensure image URLs are properly formatted
+      const validResults = data.result.filter(item => {
+        if (!item || !item.image) return false;
+        
+        // Ensure image URL is properly formatted
+        if (!item.image.startsWith('http')) {
+          item.image = `https://trace.moe${item.image}`;
+        }
+        
+        return typeof item.similarity === 'number' && 
+               item.similarity > 0 &&
+               item.anilist?.id;
+      });
+
+      if (validResults.length === 0) {
+        throw new Error('No valid matches found in the response');
+      }
+
       console.log('API Response:', data);
-      setResults(data);
+      console.log('Valid Results:', validResults);
+      
+      // Fetch additional AniList data for each result
+      const enhancedResults = await Promise.all(
+        validResults.map(async (item, index) => {
+          if (!item.anilist?.id) return item;
+          
+          try {
+            // Add delay between requests to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, index * 100));
+
+            const anilistQuery = `
+              query ($id: Int) {
+                Media (id: $id, type: ANIME) {
+                  id
+                  title {
+                    english
+                    romaji
+                  }
+                  coverImage {
+                    large
+                    extraLarge
+                  }
+                  bannerImage
+                  description
+                  genres
+                  meanScore
+                  episodes
+                  isAdult
+                }
+              }
+            `;
+
+            const anilistResponse = await fetch('https://graphql.anilist.co', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: anilistQuery,
+                variables: { id: item.anilist.id }
+              }),
+            });
+
+            if (!anilistResponse.ok) {
+              if (anilistResponse.status === 429) {
+                console.warn('Rate limit exceeded for AniList API');
+                return item;
+              }
+              console.warn(`Failed to fetch AniList data for ID ${item.anilist.id}`);
+              return item;
+            }
+
+            const anilistData = await anilistResponse.json();
+            
+            // Check for AniList API errors
+            if (anilistData.errors) {
+              console.warn('AniList API errors:', anilistData.errors);
+              return item;
+            }
+
+            const media = anilistData.data?.Media;
+
+            if (!media) {
+              console.warn(`No AniList data found for ID ${item.anilist.id}`);
+              return item;
+            }
+
+            return {
+              ...item,
+              anilist: {
+                ...item.anilist,
+                title: media.title,
+                coverImage: media.coverImage?.extraLarge || media.coverImage?.large,
+                bannerImage: media.bannerImage,
+                description: media.description,
+                genres: media.genres,
+                meanScore: media.meanScore,
+                episodes: media.episodes,
+                isAdult: media.isAdult
+              }
+            };
+          } catch (err) {
+            console.warn(`Error fetching AniList data for ID ${item.anilist.id}:`, err);
+            return item;
+          }
+        })
+      );
+
+      // Sort results by similarity in descending order
+      const sortedResults = enhancedResults.sort((a, b) => b.similarity - a.similarity);
+      
+      // Calculate the total search time
+      const endTime = Date.now();
+      const totalSearchTime = (endTime - startTime) / 1000; // Convert to seconds
+
+      setResults({ 
+        ...data, 
+        result: sortedResults,
+        frameCount: data.frameCount || 0,
+        searchTime: totalSearchTime // Use our calculated search time instead of the API's
+      });
       
       // Select the first match automatically
-      if (data.result && data.result.length > 0) {
-        setSelectedMatch(data.result[0]);
+      if (sortedResults.length > 0) {
+        setSelectedMatch(sortedResults[0]);
       }
     } catch (err) {
       console.error('Error:', err);
-      setError(err.message || 'Failed to identify the anime');
+      setError(err.message || 'Failed to identify the anime. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -145,45 +279,34 @@ export default function Home() {
       </Head>
 
       <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-center mb-2 text-blue-600">AnimeScene Finder</h1>
-        <p className="text-center text-gray-600 mb-8">Upload a screenshot to find which anime it's from</p>
-        
         <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-xl border border-gray-200 p-6 mb-8">
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="image">
-                Upload an anime screenshot
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                id="image"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="block w-full text-gray-700 border border-gray-300 bg-gray-50 rounded-lg py-2 px-3 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="imageUrl">
-                Or enter image URL
-              </label>
-              <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <div className="flex-1">
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="imageUrl">
+                  Enter image URL
+                </label>
                 <input
                   type="url"
                   id="imageUrl"
                   value={imageUrl}
                   onChange={handleUrlChange}
                   placeholder="https://example.com/anime-screenshot.jpg"
-                  className="flex-1 text-gray-700 border border-gray-300 bg-gray-50 rounded-lg rounded-r-none py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-gray-700 border border-gray-300 bg-gray-50 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button
-                  type="button"
-                  onClick={handleUrlSubmit}
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg rounded-l-none px-4"
-                >
-                  Preview
-                </button>
+              </div>
+              <div className="flex-1">
+                <label className="block text-gray-700 font-medium mb-2" htmlFor="image">
+                  Or upload screenshot
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full text-gray-700 border border-gray-300 bg-gray-50 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
 
@@ -239,16 +362,19 @@ export default function Home() {
 
         {results && results.result && results.result.length > 0 && (
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-600">
+            <h2 className="text-2xl font-semibold mb-2 text-blue-600">
               Found {results.result.length} Matches
             </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Searched {(results.frameCount || 0).toLocaleString()} frames in {results.searchTime.toFixed(2)}s
+            </p>
             
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-6">
               {/* Left side - List of matches */}
-              <div className="w-full md:w-1/3">
-                <div className="bg-white border border-gray-200 shadow-md rounded-xl p-4">
+              <div className="w-full lg:w-1/3">
+                <div className="bg-white border border-gray-200 shadow-md rounded-xl p-4 h-[600px]">
                   <h3 className="text-lg font-medium mb-3 text-gray-800">Match Results</h3>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-3 h-[calc(600px-3rem)] overflow-y-auto">
                     {results.result.map((item, index) => (
                       <div 
                         key={index} 
@@ -260,11 +386,19 @@ export default function Home() {
                         onClick={() => selectMatch(item)}
                       >
                         <div className="flex items-start space-x-2">
-                          <div className="w-16 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                          <div className="w-24 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                             <img 
-                              src={item.image} 
+                              src={`/api/proxy?url=${encodeURIComponent(item.image)}`}
                               alt="Thumbnail" 
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Image load error:', item.image);
+                                e.target.onerror = null;
+                                e.target.src = '/placeholder.svg';
+                              }}
+                              onLoad={() => {
+                                console.log('Image loaded successfully:', item.image);
+                              }}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -280,7 +414,7 @@ export default function Home() {
                                 {(item.similarity * 100).toFixed(1)}%
                               </span>
                               <span className="ml-2 text-xs text-gray-500">
-                                Ep {item.episode || 'N/A'}
+                                Ep {item.episode || 'N/A'} • {formatTime(item.from)}
                               </span>
                             </div>
                           </div>
@@ -291,19 +425,19 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Right side - Preview and details */}
-              <div className="w-full md:w-2/3">
+              {/* Right side - Preview and Details */}
+              <div className="w-full lg:w-2/3 space-y-6">
+                {/* Preview Section */}
                 {selectedMatch && (
                   <div className="bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden">
-                    {/* Video/Image preview */}
-                    <div className="relative pb-[56.25%] h-0 overflow-hidden bg-black">
+                    <div className="relative aspect-video bg-black">
                       {selectedMatch.video ? (
                         <video 
                           controls 
                           autoPlay
                           loop 
                           muted
-                          className="absolute top-0 left-0 w-full h-full object-contain"
+                          className="w-full h-full object-contain"
                           poster={selectedMatch.image}
                         >
                           <source src={selectedMatch.video} type="video/mp4" />
@@ -311,87 +445,65 @@ export default function Home() {
                         </video>
                       ) : (
                         <img 
-                          src={selectedMatch.image} 
+                          src={`/api/proxy?url=${encodeURIComponent(selectedMatch.image)}`}
                           alt="Anime scene" 
-                          className="absolute top-0 left-0 w-full h-full object-contain"
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            console.error('Preview image load error:', selectedMatch.image);
+                            e.target.onerror = null;
+                            e.target.src = '/placeholder.svg';
+                          }}
+                          onLoad={() => {
+                            console.log('Preview image loaded successfully:', selectedMatch.image);
+                          }}
                         />
                       )}
                     </div>
-                    
-                    {/* Details below preview */}
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-bold text-xl text-gray-800">
+                  </div>
+                )}
+
+                {/* Anime Details Section */}
+                {selectedMatch && (
+                  <div className="bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden">
+                    <div className="relative h-64 bg-gradient-to-b from-gray-900 to-transparent">
+                      {selectedMatch.anilist?.bannerImage ? (
+                        <img 
+                          src={selectedMatch.anilist.bannerImage} 
+                          alt="Anime Banner" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-50"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-gray-800"></div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
+                        <h3 className="text-3xl font-bold text-white mb-3">
                           {getTitle(selectedMatch)}
                         </h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          selectedMatch.similarity > 0.9 ? 'bg-green-100 text-green-800' : 
-                          selectedMatch.similarity > 0.8 ? 'bg-blue-100 text-blue-800' : 
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {(selectedMatch.similarity * 100).toFixed(1)}% Match
-                        </span>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 my-3">
-                        <div className="bg-gray-100 p-3 rounded-lg">
-                          <p className="text-sm text-gray-500">Episode</p>
-                          <p className="font-medium">{selectedMatch.episode || 'N/A'}</p>
-                        </div>
-                        <div className="bg-gray-100 p-3 rounded-lg">
-                          <p className="text-sm text-gray-500">Timestamp</p>
-                          <p className="font-medium">{formatTime(selectedMatch.from)}</p>
+                        <div className="flex items-center gap-3">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            selectedMatch.similarity > 0.9 ? 'bg-green-500/20 text-green-200' : 
+                            selectedMatch.similarity > 0.8 ? 'bg-blue-500/20 text-blue-200' : 
+                            'bg-yellow-500/20 text-yellow-200'
+                          }`}>
+                            {(selectedMatch.similarity * 100).toFixed(1)}% Match
+                          </span>
+                          <span className="text-white/90 text-sm">
+                            Episode {selectedMatch.episode || 'N/A'} • {formatTime(selectedMatch.from)}
+                          </span>
                         </div>
                       </div>
-
-                      {selectedMatch.anilist && (
-                        <div className="mt-4">
-                          {selectedMatch.anilist.isAdult && (
-                            <span className="inline-block bg-red-100 border border-red-400 text-red-700 text-xs px-2 py-1 rounded-md mb-2">
-                              NSFW Content
-                            </span>
-                          )}
-                          
-                          {selectedMatch.anilist.description && (
-                            <div className="mb-4">
-                              <p className="text-sm text-gray-600 line-clamp-3">
-                                {selectedMatch.anilist.description.replace(/<[^>]*>?/gm, '')}
-                              </p>
-                            </div>
-                          )}
-                          
-                          <div className="flex space-x-2">
-                            <a 
-                              href={`https://anilist.co/anime/${selectedMatch.anilist.id}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded-lg"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.102-1.101" />
-                              </svg>
-                              View on AniList
-                            </a>
-                            
-                            {selectedMatch.anilist.idMal && (
-                              <a 
-                                href={`https://myanimelist.net/anime/${selectedMatch.anilist.idMal}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded-lg"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.102-1.101" />
-                                </svg>
-                                View on MyAnimeList
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
+
+                    {selectedMatch.anilist && (
+                      <div>
+                        {selectedMatch.anilist.isAdult && (
+                          <span className="inline-block bg-red-100 border border-red-400 text-red-700 text-xs px-2 py-1 rounded-md">
+                            NSFW Content
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
