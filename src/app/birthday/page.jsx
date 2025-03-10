@@ -1,15 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const BirthdayPage = () => {
   const [characters, setCharacters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCharacters, setFilteredCharacters] = useState([]);
-  const searchRef = useRef(null);
+  const [currentDate, setCurrentDate] = useState('');
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+
+  useEffect(() => {
+    // Format today's date
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    setCurrentDate(today.toLocaleDateString('en-US', options));
+  }, []);
 
   const fetchBirthdayCharacters = async () => {
     try {
@@ -53,6 +59,7 @@ const BirthdayPage = () => {
                 }
               }
               favourites
+              description
             }
           }
         }
@@ -116,7 +123,6 @@ const BirthdayPage = () => {
       );
       
       setCharacters(sortedCharacters);
-      setFilteredCharacters(sortedCharacters);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching birthday data:', err);
@@ -129,36 +135,37 @@ const BirthdayPage = () => {
     fetchBirthdayCharacters();
   }, []);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredCharacters(characters);
-    } else {
-      const filtered = characters.filter(char => 
-        char.name.full.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (char.media.nodes[0]?.title.english && 
-          char.media.nodes[0].title.english.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (char.media.nodes[0]?.title.romaji && 
-          char.media.nodes[0].title.romaji.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-      setFilteredCharacters(filtered);
-    }
-  }, [searchQuery, characters]);
-
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
   const retryFetch = () => {
     fetchBirthdayCharacters();
   };
 
+  const handleCharacterClick = (character) => {
+    setSelectedCharacter(character);
+  };
+
+  const closeCharacterDetails = () => {
+    setSelectedCharacter(null);
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div>
+      <div className="container mx-auto px-4 py-6">
+        {/* Today's Date Header */}
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-800">{currentDate}</h1>
+          <h2 className="text-xl font-semibold text-blue-600 mt-2">Anime Character Birthdays Today</h2>
+        </div>
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+            <Image
+              src="/loading.gif"
+              alt="Loading..."
+              width={100}
+              height={100}
+              priority
+              className="object-contain"
+            />
           </div>
         ) : error ? (
           <div className="text-center text-red-500 text-lg p-8 bg-white rounded-lg shadow-lg">
@@ -170,25 +177,28 @@ const BirthdayPage = () => {
               Retry
             </button>
           </div>
-        ) : filteredCharacters.length === 0 ? (
+        ) : characters.length === 0 ? (
           <div className="text-center text-gray-500 text-lg p-8 bg-white rounded-lg shadow-lg">
-            No characters found. Try another search!
+            No characters found with birthdays today.
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {filteredCharacters.map(character => (
+            {characters.map(character => (
               <div 
                 key={character.id} 
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300"
+                className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition-all duration-300 cursor-pointer"
+                onClick={() => handleCharacterClick(character)}
               >
-                <div className="h-48 overflow-hidden bg-gray-100 relative">
+                <div className="aspect-[3/4] overflow-hidden bg-gray-100 relative">
                   {character.image?.large ? (
                     <div className="relative w-full h-full">
                       <Image 
                         src={character.image.large} 
                         alt={character.name.full} 
                         fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                         className="object-cover"
+                        quality={90}
                         unoptimized
                       />
                     </div>
@@ -198,18 +208,120 @@ const BirthdayPage = () => {
                     </div>
                   )}
                 </div>
-                <div className="p-3">
-                  <h2 className="text-base font-medium text-gray-800 text-center line-clamp-1">
+                <div className="p-2 text-center">
+                  <h2 className="text-sm font-medium text-gray-800 line-clamp-1">
                     {character.name.full}
                   </h2>
                   {character.media.nodes[0] && (
-                    <p className="text-xs text-gray-500 text-center mt-1 line-clamp-1">
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                       {character.media.nodes[0].title.english || character.media.nodes[0].title.romaji}
                     </p>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Character Details Popup */}
+        {selectedCharacter && (
+          <div className="fixed inset-0 bg-gray-900/75 flex items-center justify-center z-50">
+            <div className="bg-white w-full h-full sm:h-auto sm:w-[95%] sm:max-w-3xl sm:rounded-xl shadow-xl overflow-hidden relative animate-fadeIn">
+              {/* Close button */}
+              <button 
+                onClick={closeCharacterDetails}
+                className="absolute top-3 right-3 z-10 bg-white/90 rounded-full p-2 shadow-sm hover:bg-gray-100 transition-colors focus:outline-none"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Content */}
+              <div className="h-full sm:h-auto overflow-y-auto">
+                {/* Header for mobile */}
+                <div className="sticky top-0 bg-white border-b border-gray-100 p-4 sm:hidden">
+                  <h2 className="text-lg font-bold text-gray-800 pr-8">{selectedCharacter.name.full}</h2>
+                  {selectedCharacter.name.native && (
+                    <p className="text-sm text-gray-600">{selectedCharacter.name.native}</p>
+                  )}
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    {/* Image and Desktop Title Section */}
+                    <div className="w-1/4 sm:w-1/3 flex-shrink-0 mx-auto sm:mx-0">
+                      {selectedCharacter.image?.large ? (
+                        <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden ring-1 ring-gray-200">
+                          <Image 
+                            src={selectedCharacter.image.large} 
+                            alt={selectedCharacter.name.full} 
+                            fill
+                            className="object-cover"
+                            quality={90}
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-400 text-xs">No image</span>
+                        </div>
+                      )}
+                      
+                      {/* Character Name for Desktop */}
+                      <div className="hidden sm:block mt-4">
+                        <h2 className="text-xl font-bold text-gray-800">{selectedCharacter.name.full}</h2>
+                        {selectedCharacter.name.native && (
+                          <p className="text-base text-gray-600 mt-1">{selectedCharacter.name.native}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Details Section */}
+                    <div className="flex-1 space-y-3">
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Birthday</h3>
+                          <p className="text-sm font-medium text-gray-900 mt-1">
+                            {selectedCharacter.dateOfBirth.month}/{selectedCharacter.dateOfBirth.day}
+                            {selectedCharacter.dateOfBirth.year ? `/${selectedCharacter.dateOfBirth.year}` : ''}
+                          </p>
+                        </div>
+
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Popularity</h3>
+                          <p className="text-sm font-medium text-gray-900 mt-1">
+                            {selectedCharacter.favourites.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Anime */}
+                      {selectedCharacter.media.nodes[0] && (
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Featured In</h3>
+                          <p className="text-sm font-medium text-gray-900 mt-1 line-clamp-2">
+                            {selectedCharacter.media.nodes[0].title.english || selectedCharacter.media.nodes[0].title.romaji}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {selectedCharacter.description && (
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">About</h3>
+                          <div 
+                            className="text-sm text-gray-700 prose prose-sm max-w-none prose-p:my-1 prose-headings:text-blue-600 prose-a:text-blue-600"
+                            dangerouslySetInnerHTML={{ __html: selectedCharacter.description }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
