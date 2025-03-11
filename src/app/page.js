@@ -51,7 +51,7 @@ const Home = () => {
     { image: "/home/Radio.webp", route: "/radio" },
     { image: "/home/Live.webp", route: "/where-to-watch" },
     { image: "/home/Trace.webp", route: "/trace-anime" },
-    { image: "/home/Trace.webp", route: "/birthday" }
+    { image: "/home/Birthday.webp", route: "/birthday" }
   ];
 
   return (

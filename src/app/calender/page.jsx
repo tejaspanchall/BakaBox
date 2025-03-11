@@ -285,10 +285,10 @@ const Calendar = () => {
     );
   };
 
-  if (loading && !animeData.length) {
+  if (loading && !animeData.length || isRefreshing) {
     return (
       <div className="flex flex-col justify-center items-center h-full py-40">
-        <img src="/loading.gif" alt="Loading..." className="w-40 h-40 object-contain mb-4" />
+        <img src="/loading.gif" alt="Loading..." className="w-37 h-37 object-contain mb-4" />
       </div>
     );
   } 

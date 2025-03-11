@@ -157,15 +157,8 @@ const BirthdayPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Image
-              src="/loading.gif"
-              alt="Loading..."
-              width={100}
-              height={100}
-              priority
-              className="object-contain"
-            />
+          <div className="flex flex-col justify-center items-center h-full py-40">
+            <img src="/loading.gif" alt="Loading..." className="w-37 h-37 object-contain mb-4" />
           </div>
         ) : error ? (
           <div className="text-center text-red-500 text-lg p-8 bg-white rounded-lg shadow-lg">
