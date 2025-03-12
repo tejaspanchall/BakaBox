@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { getBirthdayCharacters } from '@/app/api/anilist';
 
 const BirthdayPage = () => {
   const [characters, setCharacters] = useState([]);
@@ -27,102 +28,8 @@ const BirthdayPage = () => {
       const month = today.getMonth() + 1; // Convert to 1-indexed month
       const day = today.getDate();
       
-      // GraphQL query for characters with today's birthday
-      const query = `
-        query ($page: Int, $perPage: Int) {
-          Page(page: $page, perPage: $perPage) {
-            pageInfo {
-              total
-              currentPage
-              hasNextPage
-            }
-            characters(sort: FAVOURITES_DESC, isBirthday: true) {
-              id
-              name {
-                full
-                native
-              }
-              image {
-                large
-              }
-              dateOfBirth {
-                year
-                month
-                day
-              }
-              media(sort: POPULARITY_DESC, perPage: 1) {
-                nodes {
-                  title {
-                    romaji
-                    english
-                  }
-                }
-              }
-              favourites
-              description
-            }
-          }
-        }
-      `;
-
-      let allCharacters = [];
-      let hasNextPage = true;
-      let currentPage = 1;
-
-      while (hasNextPage && currentPage <= 10) { // Limit to 10 pages to prevent infinite loops
-        try {
-          const variables = {
-            page: currentPage,
-            perPage: 50 // Maximum allowed by API
-          };
-
-          const response = await fetch('https://graphql.anilist.co', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-              query: query,
-              variables: variables
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-          }
-
-          const data = await response.json();
-          
-          if (data.errors) {
-            throw new Error(data.errors[0].message);
-          }
-          
-          const pageInfo = data.data.Page.pageInfo;
-          const pageCharacters = data.data.Page.characters;
-          
-          // Filter to ensure we only have characters with the exact birth date
-          // This is a safety check in case isBirthday doesn't work exactly as expected
-          const birthdayCharacters = pageCharacters.filter(
-            char => char.dateOfBirth && char.dateOfBirth.month === month && char.dateOfBirth.day === day
-          );
-          
-          allCharacters = [...allCharacters, ...birthdayCharacters];
-          hasNextPage = pageInfo.hasNextPage;
-          currentPage++;
-          
-        } catch (err) {
-          console.error(`Error fetching page ${currentPage}:`, err);
-          hasNextPage = false; // Stop trying if we hit an error
-        }
-      }
-      
-      // Sort by number of favorites
-      const sortedCharacters = allCharacters.sort((a, b) => 
-        b.favourites - a.favourites
-      );
-      
-      setCharacters(sortedCharacters);
+      const birthdayCharacters = await getBirthdayCharacters(month, day);
+      setCharacters(birthdayCharacters);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching birthday data:', err);

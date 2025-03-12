@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Head from 'next/head';
+import { getAnimeById } from '@/app/api/anilist';
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -142,82 +143,17 @@ export default function Home() {
           if (!item.anilist?.id) return item;
           
           try {
-            // Add delay between requests to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, index * 100));
-
-            const anilistQuery = `
-              query ($id: Int) {
-                Media (id: $id, type: ANIME) {
-                  id
-                  title {
-                    english
-                    romaji
-                  }
-                  coverImage {
-                    large
-                    extraLarge
-                  }
-                  bannerImage
-                  description
-                  genres
-                  meanScore
-                  episodes
-                  isAdult
-                }
-              }
-            `;
-
-            const anilistResponse = await fetch('https://graphql.anilist.co', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                query: anilistQuery,
-                variables: { id: item.anilist.id }
-              }),
-            });
-
-            if (!anilistResponse.ok) {
-              if (anilistResponse.status === 429) {
-                console.warn('Rate limit exceeded for AniList API');
-                return item;
-              }
-              console.warn(`Failed to fetch AniList data for ID ${item.anilist.id}`);
-              return item;
-            }
-
-            const anilistData = await anilistResponse.json();
+            const anilistData = await getAnimeById(item.anilist.id, index * 100);
             
-            // Check for AniList API errors
-            if (anilistData.errors) {
-              console.warn('AniList API errors:', anilistData.errors);
-              return item;
-            }
-
-            const media = anilistData.data?.Media;
-
-            if (!media) {
-              console.warn(`No AniList data found for ID ${item.anilist.id}`);
-              return item;
-            }
-
             return {
               ...item,
               anilist: {
                 ...item.anilist,
-                title: media.title,
-                coverImage: media.coverImage?.extraLarge || media.coverImage?.large,
-                bannerImage: media.bannerImage,
-                description: media.description,
-                genres: media.genres,
-                meanScore: media.meanScore,
-                episodes: media.episodes,
-                isAdult: media.isAdult
+                ...anilistData
               }
             };
-          } catch (err) {
-            console.warn(`Error fetching AniList data for ID ${item.anilist.id}:`, err);
+          } catch (error) {
+            console.warn(`Error fetching AniList data for ID ${item.anilist.id}:`, error);
             return item;
           }
         })
@@ -388,7 +324,7 @@ export default function Home() {
                         <div className="flex items-start space-x-2">
                           <div className="w-24 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                             <img 
-                              src={`/api/proxy?url=${encodeURIComponent(item.image)}`}
+                              src={`/trace-anime/proxy?url=${encodeURIComponent(item.image)}`}
                               alt="Thumbnail" 
                               className="w-full h-full object-cover"
                               onError={(e) => {
@@ -445,7 +381,7 @@ export default function Home() {
                         </video>
                       ) : (
                         <img 
-                          src={`/api/proxy?url=${encodeURIComponent(selectedMatch.image)}`}
+                          src={`/trace-anime/proxy?url=${encodeURIComponent(selectedMatch.image)}`}
                           alt="Anime scene" 
                           className="w-full h-full object-contain"
                           onError={(e) => {

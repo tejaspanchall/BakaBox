@@ -3,16 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Star, Play, Clock } from 'lucide-react';
 import Image from 'next/image';
- 
+import { getRandomAnime, formatAnimeData } from '@/app/api/anilist';
+
 const RandomAnime = () => {
-  const [anime, setAnime] = useState({
-    title: '',
-    description: '',
-    coverImage: '',
-    genres: [],
-    meanScore: 0,
-    episodes: 0
-  });
+  const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,58 +19,13 @@ const RandomAnime = () => {
   };
 
   const fetchRandomAnime = async () => {
-    setLoading(true);
+    if (isRefreshing) return;
     setIsRefreshing(true);
-    setShowFullDescription(false);
+    setLoading(true);
+
     try {
-      const page = Math.floor(Math.random() * 50) + 1;
-      
-      const query = `
-        query ($page: Int) {
-          Page(page: $page, perPage: 50) {
-            media(type: ANIME, sort: POPULARITY_DESC) {
-              id
-              title {
-                english
-                romaji
-              }
-              description
-              coverImage {
-                large
-                extraLarge
-              }
-              genres
-              meanScore
-              episodes
-            }
-          }
-        }
-      `;
-
-      const response = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          query,
-          variables: { page }
-        }),
-      });
-
-      const data = await response.json();
-      const animeList = data.data.Page.media;
-      const randomAnime = animeList[Math.floor(Math.random() * animeList.length)];
-
-      setAnime({
-        title: randomAnime.title.english || randomAnime.title.romaji,
-        description: randomAnime.description?.replace(/<[^>]*>/g, '') || 'No description available',
-        coverImage: randomAnime.coverImage.extraLarge || randomAnime.coverImage.large,
-        genres: randomAnime.genres,
-        meanScore: randomAnime.meanScore,
-        episodes: randomAnime.episodes
-      });
+      const randomAnime = await getRandomAnime();
+      setAnime(formatAnimeData(randomAnime));
     } catch (error) {
       console.error('Error fetching anime:', error);
     } finally {
@@ -104,8 +53,8 @@ const RandomAnime = () => {
           <div className="md:hidden">
             <div className="relative w-full h-56 bg-gray-200">
               <Image
-                src={anime.coverImage}
-                alt={anime.title}
+                src={anime?.coverImage}
+                alt={anime?.title}
                 fill
                 className="object-cover"
                 priority
@@ -116,9 +65,9 @@ const RandomAnime = () => {
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <div className="flex items-center gap-2 mb-1">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <span className="text-sm font-medium">{anime.meanScore}%</span>
+                  <span className="text-sm font-medium">{anime?.meanScore}%</span>
                 </div>
-                <h1 className="text-xl font-bold leading-tight mb-2">{anime.title}</h1>
+                <h1 className="text-xl font-bold leading-tight mb-2">{anime?.title}</h1>
               </div>
             </div>
             
@@ -126,12 +75,12 @@ const RandomAnime = () => {
               <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1.5">
                   <Play className="w-4 h-4" />
-                  <span>{anime.episodes} Episodes</span>
+                  <span>{anime?.episodes} Episodes</span>
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-1.5 mb-4">
-                {anime.genres.map((genre, index) => (
+                {anime?.genres.map((genre, index) => (
                   <span 
                     key={index} 
                     className="bg-[#4D55CC] text-white px-2 py-0.5 rounded-full text-xs mb-1"
@@ -144,8 +93,8 @@ const RandomAnime = () => {
               <div className="mb-4">
                 <h2 className="text-sm uppercase font-bold text-gray-500 mb-2">Synopsis</h2>
                 <p className="text-gray-700 text-sm leading-relaxed">
-                  {showFullDescription ? anime.description : truncateDescription(anime.description, 40)}
-                  {anime.description.split(' ').length > 40 && (
+                  {showFullDescription ? anime?.description : truncateDescription(anime?.description, 40)}
+                  {anime?.description.split(' ').length > 40 && (
                     <button 
                       onClick={() => setShowFullDescription(!showFullDescription)}
                       className="bg-transparent border-none text-[#4D55CC] cursor-pointer text-sm p-0 underline ml-1"
@@ -164,8 +113,8 @@ const RandomAnime = () => {
                 <div className="sticky top-0">
                   <div className="relative h-[420px]">
                     <Image
-                      src={anime.coverImage}
-                      alt={anime.title}
+                      src={anime?.coverImage}
+                      alt={anime?.title}
                       fill
                       className="object-cover"
                       priority
@@ -174,23 +123,23 @@ const RandomAnime = () => {
                   </div>
                   <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    <span className="font-medium">{anime.meanScore}%</span>
+                    <span className="font-medium">{anime?.meanScore}%</span>
                   </div>
                 </div>
               </div>
               
               <div className="p-8">
-                <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-4">{anime.title}</h1>
+                <h1 className="text-3xl font-bold text-gray-800 leading-tight mb-4">{anime?.title}</h1>
                 
                 <div className="flex flex-wrap items-center gap-6 mb-6 text-gray-600">
                   <div className="flex items-center gap-2">
                     <Play className="w-5 h-5 text-[#4D55CC]" />
-                    <span className="font-medium">{anime.episodes} Episodes</span>
+                    <span className="font-medium">{anime?.episodes} Episodes</span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {anime.genres.map((genre, index) => (
+                  {anime?.genres.map((genre, index) => (
                     <span 
                       key={index} 
                       className="bg-[#4D55CC] text-white px-3 py-1 rounded-full text-sm transition-colors duration-200 hover:bg-[#7A73D1]"
@@ -203,8 +152,8 @@ const RandomAnime = () => {
                 <div>
                   <h2 className="text-sm uppercase font-bold text-gray-500 mb-3">Synopsis</h2>
                   <p className="text-gray-700 leading-relaxed text-base">
-                    {showFullDescription ? anime.description : truncateDescription(anime.description)}
-                    {anime.description.split(' ').length > 50 && (
+                    {showFullDescription ? anime?.description : truncateDescription(anime?.description)}
+                    {anime?.description.split(' ').length > 50 && (
                       <button 
                         onClick={() => setShowFullDescription(!showFullDescription)}
                         className="bg-transparent border-none text-[#4D55CC] cursor-pointer text-base p-0 underline ml-1 hover:text-[#7A73D1]"

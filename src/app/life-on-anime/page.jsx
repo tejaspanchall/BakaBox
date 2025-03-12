@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { getUserAnimeStats } from '@/app/api/anilist';
 
 const TimeUnit = ({ value, label }) => {
   return (
@@ -62,162 +63,8 @@ const LifeOnAnime = () => {
     requestAnimationFrame(updateNumber);
   };
 
-  const fetchData = async (username) => {
-    const timeQuery = `
-      query ($username: String) {
-        MediaListCollection(userName: $username, type: ANIME) {
-          lists {
-            entries {
-              media {
-                id
-                title {
-                  romaji
-                  english
-                }
-                episodes
-                duration
-                genres
-                seasonYear
-                studios {
-                  nodes {
-                    name
-                  }
-                }
-              }
-              progress
-              completedAt {
-                year
-                month
-              }
-              startedAt {
-                year
-                month
-              }
-              status
-            }
-          }
-        }
-      }
-    `;
-
-    const response = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: timeQuery, variables: { username } })
-    });
-
-    const data = await response.json();
-    if (data.errors) throw new Error(data.errors[0].message);
-    return data;
-  };
-
-  const processAnimeData = (responseData) => {
-    if (!responseData.data?.MediaListCollection?.lists) return null;
-
-    let totalMinutes = 0;
-    let genreCounts = {};
-    let studioCounts = {};
-    let animeList = [];
-    let watchByYear = {};
-    let watchByMonth = {};
-    let completedCount = 0;
-    
-    responseData.data.MediaListCollection.lists.forEach(list => {
-      list.entries.forEach(entry => {
-        const episodes = entry.progress || 0;
-        const duration = entry.media?.duration || 24;
-        const watchMinutes = episodes * duration;
-        
-        totalMinutes += watchMinutes;
-        
-        entry.media?.genres?.forEach(genre => {
-          genreCounts[genre] = (genreCounts[genre] || 0) + watchMinutes;
-        });
-        
-        entry.media?.studios?.nodes?.forEach(studio => {
-          studioCounts[studio.name] = (studioCounts[studio.name] || 0) + watchMinutes;
-        });
-        
-        animeList.push({
-          id: entry.media.id,
-          title: entry.media.title.english || entry.media.title.romaji,
-          watchTime: watchMinutes,
-          episodes: episodes,
-          status: entry.status
-        });
-        
-        const year = entry.completedAt?.year || entry.startedAt?.year;
-        if (year) {
-          watchByYear[year] = (watchByYear[year] || 0) + watchMinutes;
-        }
-        
-        const month = entry.completedAt?.month || entry.startedAt?.month;
-        if (year && month) {
-          const key = `${year}-${month}`;
-          watchByMonth[key] = (watchByMonth[key] || 0) + watchMinutes;
-        }
-        
-        if (entry.status === "COMPLETED") {
-          completedCount++;
-        }
-      });
-    });
-
-    const genreData = Object.entries(genreCounts)
-      .map(([name, minutes]) => ({ name, minutes }))
-      .sort((a, b) => b.minutes - a.minutes)
-      .slice(0, 5);
-    
-    const studioData = Object.entries(studioCounts)
-      .map(([name, minutes]) => ({ name, minutes }))
-      .sort((a, b) => b.minutes - a.minutes)
-      .slice(0, 5);
-    
-    const top5Anime = animeList
-      .sort((a, b) => b.watchTime - a.watchTime)
-      .slice(0, 5);
-    
-    const yearData = Object.entries(watchByYear)
-      .map(([year, minutes]) => ({ year: parseInt(year), minutes }))
-      .sort((a, b) => a.year - b.year);
-    
-    const mostWatchedYear = yearData.length > 0 
-      ? yearData.reduce((max, current) => (current.minutes > max.minutes ? current : max)).year
-      : null;
-    
-    const monthlyData = Object.entries(watchByMonth)
-      .map(([key, minutes]) => {
-        const [year, month] = key.split('-').map(Number);
-        return { year, month, minutes };
-      })
-      .sort((a, b) => a.year === b.year ? a.month - b.month : a.year - b.year)
-      .slice(-12);
-    
-    const years = Math.floor(totalMinutes / (525600));
-    const months = Math.floor((totalMinutes % 525600) / 43800);
-    const days = Math.floor((totalMinutes % 43800) / 1440);
-    const hours = Math.floor((totalMinutes % 1440) / 60);
-    const minutes = totalMinutes % 60;
-
-    return {
-      timeData: { years, months, days, hours, minutes },
-      genres: genreData,
-      studios: studioData,
-      top5: top5Anime,
-      yearPattern: yearData,
-      monthPattern: monthlyData,
-      mostWatchedYear,
-      completedCount
-    };
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username.trim()) {
-      setError('Please enter your AniList username');
-      return;
-    }
-
     setIsLoading(true);
     setError('');
     setTimeData(null);
@@ -226,36 +73,43 @@ const LifeOnAnime = () => {
     setCompareTimeData(null);
     setIsComparing(false);
 
+    if (!username) {
+      setError('Please enter your AniList username');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetchData(username);
-      const processedData = processAnimeData(response);
-      
-      if (!processedData) throw new Error('No data found');
-      
-      setTimeData(processedData.timeData);
-      setAnimeData(processedData);
+      const stats = await getUserAnimeStats(username);
+      if (!stats) {
+        throw new Error('No data found for this username');
+      }
+
+      setTimeData(stats.timeData);
+      setAnimeData(stats);
       setCountingStats({ years: 0, months: 0, days: 0, hours: 0, minutes: 0 });
 
       // Animate counters
-      animateNumber(0, processedData.timeData.years, 2000, (value) => 
+      animateNumber(0, stats.timeData.years, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, years: value }))
       );
-      animateNumber(0, processedData.timeData.months, 2000, (value) => 
+      animateNumber(0, stats.timeData.months, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, months: value }))
       );
-      animateNumber(0, processedData.timeData.days, 2000, (value) => 
+      animateNumber(0, stats.timeData.days, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, days: value }))
       );
-      animateNumber(0, processedData.timeData.hours, 2000, (value) => 
+      animateNumber(0, stats.timeData.hours, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, hours: value }))
       );
-      animateNumber(0, processedData.timeData.minutes, 2000, (value) => 
+      animateNumber(0, stats.timeData.minutes, 2000, (value) => 
         setCountingStats(prev => ({ ...prev, minutes: value }))
       );
 
       setSubmitted(true);
     } catch (error) {
-      setError(error.message);
+      console.error('Error fetching user stats:', error);
+      setError('Failed to fetch user statistics. Please check the username and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -271,12 +125,12 @@ const LifeOnAnime = () => {
     setError('');
     
     try {
-      const response = await fetchData(compareUsername);
-      const processedData = processAnimeData(response);
+      const stats = await getUserAnimeStats(compareUsername);
+      if (!stats) {
+        throw new Error('No data found for comparison user');
+      }
       
-      if (!processedData) throw new Error('No data found for comparison user');
-      
-      setCompareTimeData(processedData.timeData);
+      setCompareTimeData(stats.timeData);
       setIsComparing(true);
     } catch (error) {
       setError(error.message);
