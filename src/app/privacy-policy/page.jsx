@@ -27,8 +27,19 @@ const PrivacyPolicy = () => {
               time zone, and some of the cookies that are installed on your device.
             </p>
             <p className="text-gray-700 mb-4">
-              <strong>Usage Data:</strong> We may collect information about how you interact with our website, including 
-              which pages you visit, what anime you view, and other actions you take while using our service.
+              <strong>Usage Data:</strong> We collect information about how you interact with our website, including:
+            </p>
+            <ul className="list-disc pl-6 mb-4 text-gray-700">
+              <li>Pages you visit and features you use</li>
+              <li>Your interactions with anime-related content</li>
+              <li>Performance metrics through Vercel Speed Insights</li>
+              <li>Usage patterns through Vercel Analytics</li>
+              <li>Radio streaming preferences and listening history</li>
+              <li>Images uploaded for anime scene tracing (these are not stored permanently)</li>
+            </ul>
+            <p className="text-gray-700 mb-4">
+              <strong>Third-Party Account Data:</strong> When you use features that integrate with AniList (such as Life on Anime statistics 
+              or birthday tracking), we access your public AniList profile data. We do not store this information permanently.
             </p>
           </section>
           
@@ -37,23 +48,39 @@ const PrivacyPolicy = () => {
             <p className="text-gray-700 mb-2">We use the information we collect to:</p>
             <ul className="list-disc pl-6 mb-4 text-gray-700">
               <li>Provide, maintain, and improve our services</li>
-              <li>Understand and analyze how you use our website</li>
-              <li>Develop new features and functionality</li>
-              <li>Personalize your experience by showing you relevant anime content</li>
-              <li>Monitor and analyze trends and usage of our website</li>
+              <li>Process and display anime scene search results</li>
+              <li>Show relevant anime character birthdays</li>
+              <li>Calculate and display anime watching statistics</li>
+              <li>Provide radio streaming services</li>
+              <li>Monitor website performance and user experience</li>
+              <li>Analyze trends and usage patterns</li>
+              <li>Prevent abuse and ensure security</li>
             </ul>
           </section>
           
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-3">Third-Party Services</h2>
             <p className="text-gray-700 mb-4">
-              Our website uses third-party services such as Anilist API to provide anime information. These services 
-              may collect information sent by your browser as part of their normal operations. Their collection and 
+              Our website integrates with several third-party services:
+            </p>
+            <ul className="list-disc pl-6 mb-4 text-gray-700">
+              <li><strong>AniList API:</strong> Used to fetch anime and user data. Their privacy policy applies to data accessed through their service.</li>
+              <li><strong>LISTEN.moe:</strong> Provides radio streaming services. Their terms and privacy policy apply to radio usage.</li>
+              <li><strong>trace.moe:</strong> Used for anime scene searching. Uploaded images are processed according to their privacy policy.</li>
+              <li><strong>Vercel Analytics & Speed Insights:</strong> Used to monitor website performance and usage patterns.</li>
+            </ul>
+            <p className="text-gray-700 mb-4">
+              These services may collect information sent by your browser as part of their normal operations. Their collection and 
               use of information is governed by their respective privacy policies.
             </p>
+          </section>
+          
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">Data Retention</h2>
             <p className="text-gray-700 mb-4">
-              We use analytics services like Vercel Analytics to help us understand how users interact with our website. 
-              These tools collect information about your use of the website, which helps us improve our services.
+              We do not permanently store any personal information or uploaded content. Images uploaded for anime scene 
+              searching are processed in real-time and are not retained. AniList profile data is accessed only when needed 
+              and is not stored on our servers.
             </p>
           </section>
           
@@ -103,7 +130,7 @@ const PrivacyPolicy = () => {
           
           <div className="mt-10 pt-6 border-t border-gray-200">
             <p className="text-gray-600 text-sm">
-              Last updated: March 2, 2025
+              Last updated: March 15, 2024
             </p>
             <Link href="/" className="inline-block mt-4 text-blue-600 hover:underline">
               Return to Home
