@@ -246,6 +246,67 @@ export async function getSeasonalAnime(season, year, page = 1) {
   return data.data.Page.media;
 }
 
+// Search for characters
+export async function searchCharacters(query, gender = null) {
+  const searchQuery = `
+    query ($search: String) {
+      characters: Page(page: 1, perPage: 10) {
+        characters: characters(search: $search) {
+          id
+          name {
+            full
+            native
+          }
+          gender
+          image {
+            large
+          }
+          media(perPage: 1) {
+            nodes {
+              title {
+                romaji
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    search: query
+  };
+
+  try {
+    const data = await fetchFromAniList(searchQuery, variables);
+    const characters = data.data.characters.characters;
+    return characters.filter(char => {
+      if (!gender) return true;
+      return char.gender && char.gender.toLowerCase() === gender.toLowerCase();
+    });
+  } catch (error) {
+    console.error('Error fetching characters:', error);
+    return [];
+  }
+}
+
+// Love calculator function
+export function calculateLove(char1, char2) {
+  // Create a string by combining both names
+  const combinedNames = `${char1}${char2}`.toLowerCase();
+  
+  // Use a deterministic algorithm based on character codes
+  let loveScore = 0;
+  for (let i = 0; i < combinedNames.length; i++) {
+    loveScore += combinedNames.charCodeAt(i);
+  }
+  
+  // Normalize the score to be between 0 and 100
+  loveScore = loveScore % 101;
+  
+  return loveScore;
+}
+
 // Helper function to format anime data
 export function formatAnimeData(anime) {
   return {
