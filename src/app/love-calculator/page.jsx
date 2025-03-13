@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { searchCharacters, calculateLove } from '../api/anilist';
 
-export default function WaifuHusbandoRate() {
+export default function LoveCalculator() {
   const [waifu, setWaifu] = useState(null);
   const [husbando, setHusbando] = useState(null);
   const [waifuSearch, setWaifuSearch] = useState('');
