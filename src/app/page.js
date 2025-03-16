@@ -52,7 +52,7 @@ const Home = () => {
     { image: "/home/Live.webp", route: "/where-to-watch" },
     { image: "/home/Trace.webp", route: "/trace-anime" },
     { image: "/home/Birthday.webp", route: "/birthday" },
-    { image: "/home/Birthday.webp", route: "/love-calculator" }
+    { image: "/home/Love-Calculator.webp", route: "/love-calculator" }
   ];
 
   return (
