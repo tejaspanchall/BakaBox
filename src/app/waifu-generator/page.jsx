@@ -89,7 +89,7 @@ export default function WaifuGenerator() {
       
       if (!response.ok || data.error) {
         const errorMessage = data.message || data.error || response.statusText;
-        const errorDetails = data.details ? `\n\nDetails: ${data.details}` : '';
+        const errorDetails = data.details || '';
         throw new Error(`${errorMessage}${errorDetails}`);
       }
 
@@ -261,46 +261,48 @@ export default function WaifuGenerator() {
 
         {/* Results */}
         {waifu && (
-          <div className="space-y-4">
+          <div className="space-y-4 flex flex-col items-center">
             <h2 className="text-2xl font-bold text-center mb-4 text-pink-400">Generated Waifus</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {waifu.generatedImages.map((img, index) => (
-                <div key={index} className="bg-white rounded-lg overflow-hidden border border-gray-300 hover:border-pink-500 transition-colors">
-                  <div 
-                    className="relative aspect-[3/4] w-full cursor-pointer"
-                    onClick={() => handleImageClick(img)}
-                  >
-                    {!loadedImages[index] && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-pink-500"></div>
-                      </div>
-                    )}
-                    {loadedImages[index] === 'error' ? (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-red-500 text-sm">
-                        Failed to load
-                      </div>
-                    ) : (
-                      <img 
-                        src={img} 
-                        alt={`Generated waifu ${index+1}`}
-                        className={`w-full h-full object-cover transition-opacity duration-300 ${loadedImages[index] ? 'opacity-100' : 'opacity-0'}`}
-                        onLoad={() => handleImageLoad(index)}
-                        onError={() => handleImageError(index)}
-                      />
-                    )}
-                  </div>
-                  <div className="p-1.5 flex justify-between items-center text-sm">
-                    <span className="text-gray-400">#{index+1}</span>
-                    <button 
-                      className="text-gray-400 hover:text-pink-500 transition-colors"
-                      onClick={() => handleDownload(img)}
-                      title="Download image"
+            <div className="w-full max-w-5xl">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 justify-items-center">
+                {waifu.generatedImages.map((img, index) => (
+                  <div key={index} className="bg-white rounded-lg overflow-hidden border border-gray-300 hover:border-pink-500 transition-colors w-full max-w-[280px]">
+                    <div 
+                      className="relative aspect-[3/4] w-full cursor-pointer"
+                      onClick={() => handleImageClick(img)}
                     >
-                      ⬇️
-                    </button>
+                      {!loadedImages[index] && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-pink-500"></div>
+                        </div>
+                      )}
+                      {loadedImages[index] === 'error' ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-red-500 text-sm">
+                          Failed to load
+                        </div>
+                      ) : (
+                        <img 
+                          src={img} 
+                          alt={`Generated waifu ${index+1}`}
+                          className={`w-full h-full object-cover transition-opacity duration-300 ${loadedImages[index] ? 'opacity-100' : 'opacity-0'}`}
+                          onLoad={() => handleImageLoad(index)}
+                          onError={() => handleImageError(index)}
+                        />
+                      )}
+                    </div>
+                    <div className="p-1.5 flex justify-between items-center text-sm">
+                      <span className="text-gray-400">#{index+1}</span>
+                      <button 
+                        className="text-gray-400 hover:text-pink-500 transition-colors"
+                        onClick={() => handleDownload(img)}
+                        title="Download image"
+                      >
+                        ⬇️
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
