@@ -53,7 +53,7 @@ const Home = () => {
     { image: "/home/Trace.webp", route: "/trace-anime" },
     { image: "/home/Birthday.webp", route: "/birthday" },
     { image: "/home/Love-Calculator.webp", route: "/love-calculator" },
-    { image: "/home/Trace.webp", route: "/waifu-generator" }
+    // { image: "/home/Trace.webp", route: "/waifu-generator" }
   ];
 
   return (
